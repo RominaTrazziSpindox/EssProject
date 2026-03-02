@@ -2,8 +2,16 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: ingestion-api
   rabbitmq:
     host: localhost
     port: 5672
     username: guest
     password: guest
+
+app:
+  rabbit:
+    exchange: crm.exchange
+    routing-key: crm.campaign.created
+    queue: crm.campaign.queue

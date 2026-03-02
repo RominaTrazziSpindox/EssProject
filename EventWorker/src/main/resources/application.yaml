@@ -1,4 +1,7 @@
 spring:
+  application:
+    name: event-worker
+
   rabbitmq:
     host: localhost
     port: 5672
