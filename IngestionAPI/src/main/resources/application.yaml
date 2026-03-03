@@ -15,3 +15,5 @@ app:
     exchange: crm.exchange
     routing-key: crm.campaign.created
     queue: crm.campaign.queue
+
+

@@ -23,10 +23,7 @@ public class RabbitConfig {
     // -------- RabbitTemplate --------
 
     @Bean
-    public RabbitTemplate rabbitTemplate(
-            ConnectionFactory connectionFactory,
-            JacksonJsonMessageConverter converter) {
-
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, JacksonJsonMessageConverter converter) {
         RabbitTemplate template = new RabbitTemplate(connectionFactory);
         template.setMessageConverter(converter);
         return template;
@@ -37,7 +34,7 @@ public class RabbitConfig {
     @Bean
     public TopicExchange topicExchange(RabbitConfigProperties properties) {
         return new TopicExchange(
-                properties.exchange(),
+                properties.exchange(), // crm.exchange on application.yaml via RabbitConfig.java
                 true,   // durable
                 false   // autoDelete
         );
@@ -47,8 +44,8 @@ public class RabbitConfig {
 
     @Bean
     public Queue campaignQueue(RabbitConfigProperties properties) {
-        return new Queue(
-                properties.queue(),
+        return new Queue (
+                properties.queue(),  // crm.campaign.queue on application.yaml via RabbitConfig.java
                 true   // durable
         );
     }
@@ -56,14 +53,10 @@ public class RabbitConfig {
     // -------- Binding --------
 
     @Bean
-    public Binding binding(
-            Queue campaignQueue,
-            TopicExchange topicExchange,
-            RabbitConfigProperties properties) {
-
+    public Binding binding(Queue campaignQueue,TopicExchange topicExchange,RabbitConfigProperties properties) {
         return BindingBuilder
-                .bind(campaignQueue)
-                .to(topicExchange)
-                .with(properties.routingKey());
+            .bind(campaignQueue)
+            .to(topicExchange)
+            .with(properties.routingKey()); // crm.campaign.routing-key on application.yaml via RabbitConfig.java
     }
 }
