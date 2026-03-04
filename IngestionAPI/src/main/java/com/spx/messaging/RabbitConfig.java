@@ -2,6 +2,7 @@ package com.spx.messaging;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -18,6 +19,13 @@ public class RabbitConfig {
     @Bean
     public JacksonJsonMessageConverter jacksonJsonMessageConverter(JsonMapper jsonMapper) {
         return new JacksonJsonMessageConverter(jsonMapper);
+    }
+
+    // -------- RabbitAdmin configuration (it declares Exchange\Queue\Binding) --------
+
+    @Bean
+    public AmqpAdmin amqpAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
     }
 
     // -------- RabbitTemplate --------
