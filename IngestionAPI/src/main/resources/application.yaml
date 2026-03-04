@@ -1,6 +1,10 @@
 server:
   port: 8080
 
+logging:
+  level:
+    org.springframework.amqp: DEBUG
+
 spring:
   application:
     name: ingestion-api
