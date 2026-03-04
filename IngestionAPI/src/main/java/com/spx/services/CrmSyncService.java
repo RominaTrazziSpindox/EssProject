@@ -18,16 +18,41 @@ public class CrmSyncService {
         this.publisher = publisher;
     }
 
-    /* Method that receives a List of incoming campaigns and splits them in a single campaigns
-    with for loop, then call the Producer class of RabbitMQ */
-    public void splittingCampaigns(List<CrmIncomingCampaignDTO> campaigns) {
 
-        log.info("Processing {} campaigns from CRM", campaigns.size());
+    /*
+     * Batch orchestrator method.
+     *
+     * This method receives a list of campaigns coming from the CRM payload.
+     * The batch is processed sequentially:
+     *
+     * 1) Iterate over the list
+     * 2) For each campaign, publish an event to RabbitMQ
+     * 3) Track how many campaigns succeed or fail
+     *
+     * Important: a failure on a single campaign MUST NOT stop the whole batch.
+     * This is typical defensive behavior in event-driven systems.
+     */
+    public void processBatch(List<CrmIncomingCampaignDTO> campaigns) {
+
+        log.info("Received {} campaigns from CRM", campaigns.size());
+
+        int published = 0;
+        int failed = 0;
+
 
         for (CrmIncomingCampaignDTO campaign : campaigns) {
-            log.info("Publishing campaign {}", campaign.getCampaignId());
-            publisher.publishCampaign(campaign);
+
+            try {
+                publisher.publishCampaign(campaign);
+                published++;
+            } catch (Exception ex) {
+                failed++;
+                log.error("Error publishing campaign {}", campaign.getCampaignId(), ex);
+            }
         }
+
+        // Batch summary log with results
+        log.info("Campaign batch processed: total={}, published={}, failed={}", campaigns.size(), published, failed);
     }
 }
 
