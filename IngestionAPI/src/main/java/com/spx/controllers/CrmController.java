@@ -15,21 +15,21 @@ import java.util.List;
 @RequestMapping("api")
 public class CrmController {
 
+    // Constructor injection
     private final CrmSyncService crmSyncService;
 
     public CrmController(CrmSyncService crmSyncService) {
         this.crmSyncService = crmSyncService;
     }
 
-    /* It receives the list of the incoming campaingns + attendees from the CRM (in DTO format)
+    /* It receives the list of the incoming campaigns + attendees from the CRM (in DTO format)
     and retrieve a Void entity + a 202 Accepted HTTP status code */
     @PostMapping("/v1/crm/sync")
     public ResponseEntity<Void> syncCampaigns(@RequestBody @Valid List<CrmIncomingCampaignDTO> campaigns){
 
-        crmSyncService.processCampaigns(campaigns);
+        // Call the method which split every campaign in a single message for RabbitTemplate
+        crmSyncService.splittingCampaigns(campaigns);
 
         return ResponseEntity.accepted().build();
-
     }
-
 }
