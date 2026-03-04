@@ -1,6 +1,7 @@
 package com.spx.controllers;
 
 import com.spx.dto.CrmIncomingCampaignDTO;
+import com.spx.dto.CrmSyncResponseDTO;
 import com.spx.services.CrmSyncService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.Instant;
 import java.util.List;
 
 @RestController
@@ -25,11 +27,18 @@ public class CrmController {
     /* It receives the list of the incoming campaigns + attendees from the CRM (in DTO format)
     and retrieve a Void entity + a 202 Accepted HTTP status code */
     @PostMapping("/v1/crm/sync")
-    public ResponseEntity<Void> syncCampaigns(@RequestBody @Valid List<CrmIncomingCampaignDTO> campaigns){
+    public ResponseEntity<CrmSyncResponseDTO> syncCampaigns(@RequestBody @Valid List<CrmIncomingCampaignDTO> campaigns){
 
         // Call the method which split every campaign in a single message for RabbitTemplate
-        crmSyncService.splittingCampaigns(campaigns);
+        crmSyncService.processBatch(campaigns);
 
-        return ResponseEntity.accepted().build();
+        CrmSyncResponseDTO response = CrmSyncResponseDTO.builder()
+                .status("ACCEPTED")
+                .campaignsReceived(campaigns.size())
+                .message("Campaign batch accepted for processing")
+                .timestamp(Instant.now())
+                .build();
+
+        return ResponseEntity.accepted().body(response);
     }
 }
