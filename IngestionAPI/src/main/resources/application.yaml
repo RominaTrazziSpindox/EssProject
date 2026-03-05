@@ -1,10 +1,3 @@
-server:
-  port: 8080
-
-logging:
-  level:
-    org.springframework.amqp: DEBUG
-
 spring:
   application:
     name: ingestion-api
@@ -20,4 +13,13 @@ app:
     routing-key: crm.campaign.created
     queue: crm.campaign.queue
 
+logging:
+  level:
+    org.springframework.amqp: DEBUG
 
+security:
+  api-key: secret-key
+
+
+server:
+  port: 8080
