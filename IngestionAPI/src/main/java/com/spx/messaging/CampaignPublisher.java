@@ -1,5 +1,6 @@
 package com.spx.messaging;
 
+import com.spx.config.RabbitConfigProperties;
 import com.spx.dto.CrmIncomingCampaignDTO;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.spx.messaging;
+package com.spx.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 // It takes the app.properties from the application.yaml file and insert them into a new Java object

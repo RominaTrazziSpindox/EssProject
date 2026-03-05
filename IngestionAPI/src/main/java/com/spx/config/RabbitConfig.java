@@ -1,4 +1,4 @@
-package com.spx.messaging;
+package com.spx.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -32,9 +32,13 @@ public class RabbitConfig {
 
     @Bean
     public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory, JacksonJsonMessageConverter converter) {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(converter);
-        return template;
+
+        RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+
+        // JSON converter
+        rabbitTemplate.setMessageConverter(converter);
+
+        return rabbitTemplate;
     }
 
     // -------- Exchange --------
@@ -54,7 +58,7 @@ public class RabbitConfig {
     public Queue campaignQueue(RabbitConfigProperties properties) {
         return new Queue (
                 properties.queue(),  // crm.campaign.queue on application.yaml via RabbitConfig.java
-                true   // durable
+                false   // not durable
         );
     }
 
