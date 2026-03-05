@@ -23,64 +23,41 @@ public class CrmSyncService {
      * Batch orchestrator method.
      *
      * This method receives a list of campaigns coming from the CRM payload.
-     * The batch is processed sequentially:
      *
-     * 1) Iterate over the list
-     * 2) For each campaign, publish an event to RabbitMQ
-     * 3) Track how many campaigns were successfully published and how many failed
+     * Processing flow:
+     * 1) The request payload has already been validated by Controller layer using @Valid
+     * 2) Each campaign is published as an independent message to RabbitMQ
+     * 3) The method does not perform per-campaign validation or recovery logic
      *
-     * Important:
+     * Error handling:
      *
-     * Error handling strategy:
+     * If RabbitMQ becomes unavailable during publishing (AmqpException),
+     * the exception is propagated so the API layer can return HTTP 503.
      *
-     * If RabbitMQ is unavailable (AmqpException), the error is considered
-     * a critical infrastructure failure. The exception is rethrown so that
-     * the GlobalExceptionHandler can return HTTP 503.
-     *
-     * If an error occurs while processing a single campaign (for example
-     * IllegalArgumentException or other unexpected runtime exceptions),
-     * the failure is logged and the batch continues with the next campaign.
-     * This prevents a single bad item from blocking the whole batch.
-     *
+     * Since request validation happens before this service is called,
+     * all campaigns in the list are considered structurally valid.
      */
 
     public void processBatch(List<CrmIncomingCampaignDTO> campaigns) {
 
         int totalCampaigns = campaigns.size();
         int published = 0;
-        int failed = 0;
 
-        // Batch identifier
         String batchId = UUID.randomUUID().toString().substring(0,8);
 
-        // Batch start log
         log.info("[batch:{}] Processing {} campaigns", batchId, totalCampaigns);
 
-
+        // For loop split the batch in single campaigns
         for (CrmIncomingCampaignDTO campaign : campaigns) {
 
-            // Publish campaign event to RabbitMQ
-            try {
-                publisher.publishCampaign(campaign);
-                published++;
+            publisher.publishCampaign(campaign);
+            published++;
 
-                /* Infrastructure failure: RabbitMQ not reachable or connection lost
-                The exception is rethrown so the API returns HTTP 503 */
-            } catch (org.springframework.amqp.AmqpException ex) {
-                log.error("[batch:{}] RabbitMQ unavailable while publishing campaign {}", batchId, campaign.getCampaignId(), ex);
-                throw ex;
-
-                /* Non-critical error on a single campaign
-                The batch continues processing the remaining campaigns */
-            } catch (Exception ex) {
-                failed++;
-                log.error("[batch:{}] Error publishing campaign {}", batchId, campaign.getCampaignId(), ex);
-            }
+            log.debug("[batch:{}] Campaign {} published", batchId, campaign.getCampaignId());
         }
 
         // Batch summary log with results
-        log.info("[batch:{}] Batch completed: published={} failed={}", batchId, published, failed);
-
+        log.info("[batch:{}] Batch completed: published={}", batchId, published);
     }
 }
 

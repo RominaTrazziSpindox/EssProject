@@ -13,8 +13,6 @@ public class CrmSyncResponseDTO {
 
     private String status;
     private int campaignsReceived;
-    private int campaignsAccepted;
-    private int campaignsRejected;
     private String message;
     private Instant timestamp;
 
