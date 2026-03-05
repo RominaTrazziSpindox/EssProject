@@ -4,6 +4,7 @@ import com.spx.dto.CrmIncomingCampaignDTO;
 import com.spx.messaging.CampaignPublisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.UUID;
 
 import java.util.List;
 
@@ -17,7 +18,6 @@ public class CrmSyncService {
     public CrmSyncService(CampaignPublisher publisher) {
         this.publisher = publisher;
     }
-
 
     /*
      * Batch orchestrator method.
@@ -46,11 +46,16 @@ public class CrmSyncService {
 
     public void processBatch(List<CrmIncomingCampaignDTO> campaigns) {
 
-        // Batch start log
-        log.info("Received {} campaigns from CRM", campaigns.size());
-
+        int totalCampaigns = campaigns.size();
         int published = 0;
         int failed = 0;
+
+        // Batch identifier
+        String batchId = UUID.randomUUID().toString().substring(0,8);
+
+        // Batch start log
+        log.info("[batch:{}] Processing {} campaigns", batchId, totalCampaigns);
+
 
         for (CrmIncomingCampaignDTO campaign : campaigns) {
 
@@ -62,19 +67,19 @@ public class CrmSyncService {
                 /* Infrastructure failure: RabbitMQ not reachable or connection lost
                 The exception is rethrown so the API returns HTTP 503 */
             } catch (org.springframework.amqp.AmqpException ex) {
-                log.error("RabbitMQ unavailable while publishing campaign {}", campaign.getCampaignId(), ex);
+                log.error("[batch:{}] RabbitMQ unavailable while publishing campaign {}", batchId, campaign.getCampaignId(), ex);
                 throw ex;
 
                 /* Non-critical error on a single campaign
                 The batch continues processing the remaining campaigns */
             } catch (Exception ex) {
                 failed++;
-                log.error("Error publishing campaign {}", campaign.getCampaignId(), ex);
+                log.error("[batch:{}] Error publishing campaign {}", batchId, campaign.getCampaignId(), ex);
             }
         }
 
         // Batch summary log with results
-        log.info("Campaign batch processed: total={}, published={}, failed={}", campaigns.size(), published, failed);
+        log.info("[batch:{}] Batch completed: published={} failed={}", batchId, published, failed);
 
     }
 }
