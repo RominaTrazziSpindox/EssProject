@@ -1,28 +1,45 @@
 package com.spx.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDate;
 
-
 @Entity
+@Table(name = "attendees")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Attendee {
 
     @Id
-    private String qrCode;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Column(name = "cn")
     private String cn;
+
+    @Column(name = "first_name", nullable = false)
     private String firstName;
+
+    @Column(name = "last_name", nullable = false)
     private String lastName;
+
+    @Column(name = "birth_date")
     private LocalDate birthDate;
 
+    @Column(name = "partner_id", nullable = false)
     private String partnerId;
-    private Boolean isCompanion;
 
-    @ManyToOne
-    @JoinColumn(name = "campaign_id")
+    @Column(name = "is_companion", nullable = false)
+    private boolean isCompanion;
+
+    @Column(name = "qr_code", nullable = false, unique = true)
+    private String qrCode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "campaign_id", nullable = false)
     private Campaign campaign;
+
 }
