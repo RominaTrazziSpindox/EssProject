@@ -12,6 +12,7 @@ import java.time.Instant;
 public class CrmSyncResponseDTO {
 
     private String status;
+    private String batchId;
     private int campaignsReceived;
     private String message;
     private Instant timestamp;
