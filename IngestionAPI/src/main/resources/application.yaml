@@ -20,6 +20,5 @@ logging:
 security:
   api-key: secret-key
 
-
 server:
   port: 8080

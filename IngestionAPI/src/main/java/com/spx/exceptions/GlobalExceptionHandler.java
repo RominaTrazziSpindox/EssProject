@@ -18,9 +18,9 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     // Builder helper method of ApiErrorDTO
-    private ApiErrorDTO buildError(HttpStatus status, String errorTitle, String message, String action, String path) {
+    private static ResponseEntity<ApiErrorDTO> buildResponseError(HttpStatus status, String errorTitle, String message, String action, String path) {
 
-        return ApiErrorDTO.builder()
+        ApiErrorDTO error = ApiErrorDTO.builder()
                 .status(status.value())
                 .errorTitle(errorTitle)
                 .message(message)
@@ -28,8 +28,9 @@ public class GlobalExceptionHandler {
                 .path(path)
                 .timestamp(LocalDateTime.now())
                 .build();
-    }
 
+        return ResponseEntity.status(status).body(error);
+    }
 
     // JSON PARSING ERROR (400 BAD REQUEST)
     /*
@@ -49,15 +50,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorDTO> handleMalformedJson(HttpMessageNotReadableException ex, HttpServletRequest request) {
 
-        log.warn("Malformed JSON request on {} - {}", request.getRequestURI(), ex.getMessage());
+        log.error("Malformed JSON request on {} - {}", request.getRequestURI(), ex.getMessage());
 
-        ApiErrorDTO error = buildError(HttpStatus.BAD_REQUEST,"Bad Request","Malformed JSON request",
-                "Check request body format", request.getRequestURI()
-        );
-
-        return ResponseEntity.badRequest().body(error);
+        return buildResponseError(HttpStatus.BAD_REQUEST, "Bad Request", "Malformed JSON request", "Check request body format", request.getRequestURI());
     }
-
 
     // REQUEST BODY VALIDATION ERROR (400 BAD REQUEST)
     /*
@@ -79,18 +75,14 @@ public class GlobalExceptionHandler {
      * indicating which field failed validation.
      */
     @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiErrorDTO> handleHandlerValidation(HandlerMethodValidationException ex,HttpServletRequest request) {
+    public ResponseEntity<ApiErrorDTO> handleValidation(HandlerMethodValidationException ex,HttpServletRequest request) {
 
-        ApiErrorDTO error = buildError(
-                HttpStatus.BAD_REQUEST,
-                "Validation Error",
-                "Request validation failed",
-                "Check request fields",
-                request.getRequestURI()
-        );
+        log.error("Validation JSON request on {} - {}", request.getRequestURI(), ex.getMessage());
 
-        return ResponseEntity.badRequest().body(error);
+        return buildResponseError(HttpStatus.BAD_REQUEST,"Validation Error","Request validation failed","Check request fields", request.getRequestURI());
     }
+
+
     // GENERIC UNEXPECTED ERROR (500 INTERNAL SERVER ERROR)
     /*
      * This is the global fallback handler for any exception not explicitly
@@ -110,17 +102,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorDTO> handleGenericError(Exception ex, HttpServletRequest request) {
 
-        log.error("Unexpected error on {}", request.getRequestURI(), ex);
+        log.error("Unexpected error on {} - {}", request.getRequestURI(), ex.getMessage());
 
-        ApiErrorDTO error = buildError(
-                HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal Server Error",
-                "Unexpected server error",
-                "Contact support",
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        return buildResponseError(HttpStatus.INTERNAL_SERVER_ERROR,"Messaging Error","Failed to publish message to broker","Retry later",request.getRequestURI());
     }
 
     // RABBITMQ / MESSAGE BROKER ERROR (503 SERVICE UNAVAILABLE)
@@ -140,16 +124,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AmqpException.class)
     public ResponseEntity<ApiErrorDTO> handleRabbitError(AmqpException ex, HttpServletRequest request) {
 
-        log.error("RabbitMQ publish failed on {}", request.getRequestURI(), ex);
+        log.error("RabbitMQ publish failed on {} - {}", request.getRequestURI(), ex.getMessage());
 
-        ApiErrorDTO error = buildError(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                "Messaging Error",
-                "Failed to publish message to broker",
-                "Retry later",
-                request.getRequestURI()
-        );
-
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(error);
+        return buildResponseError(HttpStatus.SERVICE_UNAVAILABLE,"Internal Server Error","Unexpected server error","Contact support", request.getRequestURI());
     }
 }
+
