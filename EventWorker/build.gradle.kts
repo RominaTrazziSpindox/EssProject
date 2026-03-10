@@ -17,9 +17,9 @@ dependencies {
     // Tomcat
     implementation ("org.springframework.boot:spring-boot-starter-web")
 
-    // Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok")
+    // MapStruct
+    implementation("org.mapstruct:mapstruct:1.6.0")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0")
 
     // JPA (Hibernate)
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -29,6 +29,11 @@ dependencies {
 
     // RabbitMQ
     implementation("org.springframework.boot:spring-boot-starter-amqp")
+
+    // Lombok
+    compileOnly("org.projectlombok:lombok")
+    implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.projectlombok:lombok")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
