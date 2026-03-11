@@ -1,12 +1,9 @@
 package com.spx.mappers;
 
 import com.spx.dto.CampaignEventDTO;
-import com.spx.models.Attendee;
 import com.spx.models.Campaign;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 /*
  * MapStruct mapper responsible for converting CampaignEventDTO objects into Campaign entities.
@@ -23,17 +20,4 @@ public interface CampaignMapper {
     @Mapping(target = "id", ignore = true)
     Campaign toEntity(CampaignEventDTO dto);
 
-    /*
-     * After the mapping is completed, this method is executed to fix the bidirectional relationship between Campaign and Attendee.
-     * MapStruct creates the Attendee entities but does not know how to populate the "campaign" field inside each Attendee.
-     * This method links every Attendee with its parent Campaign entity.
-     */
-    @AfterMapping
-    default void linkAttendees(@MappingTarget Campaign campaign) {
-
-        for (Attendee attendee : campaign.getAttendees()) {
-            attendee.setCampaign(campaign);
-        }
-
-    }
 }
