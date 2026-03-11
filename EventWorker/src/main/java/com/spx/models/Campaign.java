@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "campaigns", uniqueConstraints = { @UniqueConstraint(columnNames = {"campaign_id", "sub_campaign_id"})})
+@Table(name = "campaigns")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +18,7 @@ public class Campaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "campaign_id", nullable = false)
+    @Column(name = "campaign_id", nullable = false, unique = true)
     private String campaignId;
 
     @Column(name = "sub_campaign_id")
