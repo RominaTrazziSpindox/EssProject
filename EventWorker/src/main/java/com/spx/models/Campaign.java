@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "campaigns",uniqueConstraints = { @UniqueConstraint(columnNames = {"campaign_id", "sub_campaign_id"})})
+@Table(name = "campaigns", uniqueConstraints = { @UniqueConstraint(columnNames = {"campaign_id", "sub_campaign_id"})})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,9 +24,10 @@ public class Campaign {
     @Column(name = "sub_campaign_id")
     private String subCampaignId;
 
+
+    // When a campaign is deleted, all related attendees are removed due to cascade and orphanRemoval
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
 
     @Builder.Default
     private List<Attendee> attendees = new ArrayList<>();
-
 }
