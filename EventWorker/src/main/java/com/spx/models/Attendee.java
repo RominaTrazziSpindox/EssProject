@@ -10,7 +10,6 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Attendee {
 
     @Id

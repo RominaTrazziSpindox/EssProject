@@ -25,9 +25,9 @@ public class Campaign {
     private String subCampaignId;
 
 
-    // When a campaign is deleted, all related attendees are removed due to cascade and orphanRemoval
+    /* When a campaign is deleted, all related attendees are removed due to cascade and orphanRemoval
+    MappedBy is linked to the attribute "campaign" in Attendee table */
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
-
     @Builder.Default
     private List<Attendee> attendees = new ArrayList<>();
 }
