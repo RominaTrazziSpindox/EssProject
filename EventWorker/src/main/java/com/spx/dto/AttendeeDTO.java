@@ -1,5 +1,8 @@
 package com.spx.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -10,12 +13,24 @@ import java.time.LocalDate;
 @Builder
 public class AttendeeDTO {
 
-    private String cn;
+    @NotBlank(message="First name cannot be blank")
     private String firstName;
+
+    @NotBlank(message="Last name cannot be blank")
     private String lastName;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
+
+    @NotBlank(message="PartnerId cannot be blank")
     private String partnerId;
-    private boolean isCompanion;
+
+    private String cn; // Companion name
+
+    @NotNull(message="IsCompanion cannot be null")
+    private Boolean isCompanion;
+
+    @NotBlank(message="The QR code cannot be blank")
     private String qrCode;
 
 }

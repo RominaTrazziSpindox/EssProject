@@ -27,7 +27,7 @@ public class CrmIncomingAttendeeDTO {
 
     private String cn; // Companion name
 
-    @NotNull(message="IsCompanion cannot be settled")
+    @NotNull(message="IsCompanion cannot be null")
     private Boolean isCompanion;
 
     @NotBlank(message="The QR code cannot be blank")
