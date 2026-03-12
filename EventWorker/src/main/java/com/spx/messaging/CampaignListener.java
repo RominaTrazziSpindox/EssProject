@@ -23,8 +23,8 @@ public class CampaignListener {
      * This listener is triggered every time a message arrives on the crm.campaigns.queue.
      * The payload is automatically deserialized into CampaignEventDTO from JSON thanks to the Jackson message converter configured in RabbitConfig.
      */
-    @RabbitListener(queues = "crm.campaigns.queue")
-    public void consumeCampaignEvent(CampaignEventDTO campaignEventDTO) {
+    @RabbitListener(queues = {"${app.rabbit.queue}"})
+    public void consumeCampaign(CampaignEventDTO campaignEventDTO) {
 
         log.info( "Received campaign event from queue - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
 

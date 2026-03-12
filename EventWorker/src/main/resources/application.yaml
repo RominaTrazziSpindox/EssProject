@@ -8,6 +8,10 @@ spring:
     username: guest
     password: guest
 
+app:
+  rabbit:
+    queue: crm.campaign.queue
+
   datasource:
     url: jdbc:postgresql://localhost:5432/ess_data
     username: postgres
