@@ -7,7 +7,6 @@ import com.spx.mappers.AttendeeMapper;
 import com.spx.mappers.CampaignMapper;
 import com.spx.repos.CampaignRepository;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,13 +15,19 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class CampaignProcessService {
 
+    // Constructor injection
     private final CampaignRepository campaignRepository;
     private final CampaignMapper campaignMapper;
     private final AttendeeMapper attendeeMapper;
+
+    public CampaignProcessService(CampaignRepository campaignRepository, CampaignMapper campaignMapper, AttendeeMapper attendeeMapper) {
+        this.campaignRepository = campaignRepository;
+        this.campaignMapper = campaignMapper;
+        this.attendeeMapper = attendeeMapper;
+    }
 
     /**
      * Processes an incoming campaign event coming from RabbitMQ.
@@ -59,7 +64,6 @@ public class CampaignProcessService {
         // STEP 1.1: Create an Object type Campaign without assigning any properties yet.
         Campaign campaign;
 
-
         // STEP 2:
         if (optionalCampaign.isEmpty()) {
 
@@ -76,7 +80,6 @@ public class CampaignProcessService {
 
             // Step 2.1: Retrieve the existing campaign object from the database
             campaign = optionalCampaign.get();
-
         }
 
         /* STEP 3: Create a List of attendee using AttendeeMapper (from DTO -> to Entity\Java Object)
