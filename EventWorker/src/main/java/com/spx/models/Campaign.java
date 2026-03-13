@@ -30,4 +30,10 @@ public class Campaign {
     @OneToMany(mappedBy = "campaign", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Attendee> attendees = new ArrayList<>();
+
+    // Method
+    public void addAttendee(Attendee attendee) {
+        attendees.add(attendee);
+        attendee.setCampaign(this);
+    }
 }

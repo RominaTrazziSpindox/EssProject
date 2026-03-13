@@ -91,8 +91,12 @@ public class CampaignProcessService {
                 attendee -> attendee.setCampaign(campaign)
         );
 
-        // Step 5: Link the entire List of attendees to a specific campaign (property: attendees of Campaign model)
-        campaign.setAttendees(attendees);
+        // Step 5: Clear old list of attendees and add the new one for ensuring full state synchronization
+        campaign.getAttendees().clear();
+
+        for (Attendee attendee : attendees) {
+            campaign.addAttendee(attendee);
+        }
 
         // Step 6: Persist the campaign and all its attendees together (due to CascadeType.ALL operations on Campaign entity are extended to Attendee entity)
         campaignRepository.save(campaign);
