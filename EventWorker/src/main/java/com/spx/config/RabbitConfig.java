@@ -1,6 +1,6 @@
 package com.spx.config;
 
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
@@ -12,16 +12,45 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitConfig {
 
     // Inject the Queue's name from application.yaml. It must be equal to the one into Producer
-    @Value("${rabbitmq.queues.campaign}")
+    @Value("${app.rabbit.queue}")
     private String campaignQueue;
 
+    // Create DLX and DLQ constants for DLQ Queue and DLX Exchange
+    private static final String DLX = "crm.dlx";
+    private static final String DLQ = "crm.campaigns.dlq";
+
     /**
+     * Main Queue
      * Declares the queue used by the EventWorker consumer.
      * If the queue does not exist, RabbitMQ will create it automatically.
      */
     @Bean
     public Queue campaignQueue() {
-        return new Queue(campaignQueue, true);
+        return QueueBuilder.durable(campaignQueue)
+                .withArgument("x-dead-letter-exchange", DLX)
+                .withArgument("x-dead-letter-routing-key", campaignQueue)
+                .build();
+    }
+
+    // Dead Letter Queue
+    @Bean
+    public Queue deadLetterQueue() {
+        return QueueBuilder.durable(DLQ).build();
+    }
+
+    // Dead Letter Exchange
+    @Bean
+    public DirectExchange deadLetterExchange() {
+        return new DirectExchange(DLX);
+    }
+
+    // Binding DLQ → DLX
+    @Bean
+    public Binding dlqBinding() {
+        return BindingBuilder
+                .bind(deadLetterQueue())
+                .to(deadLetterExchange())
+                .with(campaignQueue);
     }
 
 

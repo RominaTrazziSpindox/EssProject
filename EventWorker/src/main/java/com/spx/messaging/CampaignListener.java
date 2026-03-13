@@ -3,6 +3,7 @@ package com.spx.messaging;
 import com.spx.dto.CampaignEventDTO;
 import com.spx.services.CampaignProcessService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -26,9 +27,21 @@ public class CampaignListener {
     @RabbitListener(queues = {"${app.rabbit.queue}"})
     public void consumeCampaign(CampaignEventDTO campaignEventDTO) {
 
+        try {
+
+            // Call service layer and its method
+            campaignProcessService.processCampaignFromRabbit(campaignEventDTO);
+
+        } catch (Exception e) {
+
+            log.error("Error processing campaign {}", campaignEventDTO.getCampaignId(), e);
+
+            // If the message fails, move it to the DLQ and remove from the current Queue
+            throw new AmqpRejectAndDontRequeueException(e);
+        }
+
         log.info( "Received campaign event from queue - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
 
-        // Call service layer and its method
-        campaignProcessService.processCampaignFromRabbit(campaignEventDTO);
+
     }
 }
