@@ -40,35 +40,4 @@ public class RabbitConfig {
 
         return rabbitTemplate;
     }
-
-    // -------- Exchange --------
-
-    @Bean
-    public TopicExchange topicExchange(RabbitConfigProperties properties) {
-        return new TopicExchange(
-                properties.exchange(), // crm.exchange on application.yaml via RabbitConfig.java
-                true,   // durable
-                false   // autoDelete
-        );
-    }
-
-    // -------- Queue --------
-
-    @Bean
-    public Queue campaignQueue(RabbitConfigProperties properties) {
-        return new Queue (
-                properties.queue(),  // crm.campaign.queue on application.yaml via RabbitConfig.java
-                false   // not durable
-        );
-    }
-
-    // -------- Binding --------
-
-    @Bean
-    public Binding binding(Queue campaignQueue,TopicExchange topicExchange,RabbitConfigProperties properties) {
-        return BindingBuilder
-            .bind(campaignQueue)
-            .to(topicExchange)
-            .with(properties.routingKey()); // crm.campaign.routing-key on application.yaml via RabbitConfig.java
-    }
 }

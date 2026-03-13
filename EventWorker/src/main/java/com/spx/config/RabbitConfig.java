@@ -15,6 +15,10 @@ public class RabbitConfig {
     @Value("${app.rabbit.queue}")
     private String campaignQueue;
 
+    // Exchange and routing key used by the producer (Main)
+    private static final String EXCHANGE = "crm.exchange";
+    private static final String ROUTING_KEY = "crm.campaign.created";
+
     // Create DLX and DLQ constants for DLQ Queue and DLX Exchange
     private static final String DLX = "crm.dlx";
     private static final String DLQ = "crm.campaigns.dlq";
@@ -31,6 +35,28 @@ public class RabbitConfig {
                 .withArgument("x-dead-letter-routing-key", campaignQueue)
                 .build();
     }
+
+    /**
+     * Main Exchange
+     * Where the Producer publishes messages
+     */
+    @Bean
+    public DirectExchange crmExchange() {
+        return new DirectExchange(EXCHANGE);
+    }
+
+    /**
+     * Binding between the main Exchange and main Queue.
+     */
+    @Bean
+    public Binding campaignBinding() {
+        return BindingBuilder
+                .bind(campaignQueue())
+                .to(crmExchange())
+                .with(ROUTING_KEY);
+    }
+
+    // Secondary Queue //
 
     // Dead Letter Queue
     @Bean
@@ -79,7 +105,7 @@ public class RabbitConfig {
         // Convert the incoming JSON from Rabbit into DTO object
         rabbitListenerFactory.setMessageConverter(messageConverter);
 
-        // Use between 2 and 5 Consumer togheter
+        // Use between 2 and 5 Consumer together
         rabbitListenerFactory.setConcurrentConsumers(2);
         rabbitListenerFactory.setMaxConcurrentConsumers(5);
 
