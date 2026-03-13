@@ -22,7 +22,7 @@ public class AttendeeDTO {
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthDate;
 
-    @NotBlank(message="PartnerId cannot be blank")
+    @NotNull(message="PartnerId cannot be null")
     private String partnerId;
 
     private String cn; // Companion name
