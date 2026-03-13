@@ -1,6 +1,9 @@
 spring:
   application:
     name: event-worker
+  sql:
+    init:
+      mode: always
 
   rabbitmq:
     host: localhost
@@ -16,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:

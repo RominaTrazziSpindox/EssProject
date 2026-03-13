@@ -16,9 +16,6 @@ public class Attendee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "qr_code", nullable = false, unique = true)
-    private String qrCode;
-
     @Column(name = "cn")
     private String cn;
 
@@ -37,6 +34,8 @@ public class Attendee {
     @Column(name = "is_companion", nullable = false)
     private boolean isCompanion;
 
+    @Column(name = "qr_code", nullable = false, unique = true)
+    private String qrCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "campaign_id_rif", nullable = false)
