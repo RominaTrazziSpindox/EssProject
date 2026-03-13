@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,7 +42,7 @@ public class CrmController {
                 .batchId(batchId)
                 .campaignsReceived(campaigns.size())
                 .message("Campaign batch accepted for processing")
-                .timestamp(Instant.now())
+                .timestamp(LocalDateTime.now())
                 .build();
 
         return ResponseEntity.accepted().body(response);
