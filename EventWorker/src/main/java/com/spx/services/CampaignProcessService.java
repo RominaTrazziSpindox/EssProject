@@ -93,6 +93,7 @@ public class CampaignProcessService {
 
         // Step 5: Clear old list of attendees and add the new one for ensuring full state synchronization
         campaign.getAttendees().clear();
+        campaignRepository.flush(); // Force deleting before inserting new attendees
 
         for (Attendee attendee : attendees) {
             campaign.addAttendee(attendee);
