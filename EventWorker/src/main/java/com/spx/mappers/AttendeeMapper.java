@@ -3,6 +3,7 @@ package com.spx.mappers;
 import com.spx.dto.AttendeeDTO;
 import com.spx.models.Attendee;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -16,12 +17,14 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface AttendeeMapper {
 
-    /*
-     * Converts a single AttendeeDTO into an Attendee entity.
-     */
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "campaign", ignore = true)
+    @Mapping(target = "companion", source = "isCompanion")
+
+    // Converts a single AttendeeDTO into an Attendee entity.
     Attendee toEntity(AttendeeDTO dto);
 
-
+    // Converts a DTO List (= CRM payload) into a for cycle of single DTOs
     List<Attendee> toEntityList(List<AttendeeDTO> dtoList);
 
 }
