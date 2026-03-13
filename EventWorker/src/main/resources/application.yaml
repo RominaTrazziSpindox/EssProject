@@ -3,7 +3,7 @@ spring:
     name: event-worker
   sql:
     init:
-      mode: always
+      mode: never
 
   rabbitmq:
     host: localhost
