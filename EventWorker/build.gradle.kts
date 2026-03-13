@@ -26,14 +26,18 @@ dependencies {
 
     // Postgres driver
     implementation("org.postgresql:postgresql")
+    runtimeOnly("org.postgresql:postgresql")
 
     // RabbitMQ
     implementation("org.springframework.boot:spring-boot-starter-amqp")
 
     // Lombok
     compileOnly("org.projectlombok:lombok")
-    implementation("org.projectlombok:lombok-mapstruct-binding:0.2.0")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     annotationProcessor("org.projectlombok:lombok")
+
+    // Valid
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
