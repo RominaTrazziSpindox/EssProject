@@ -29,16 +29,16 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 
     // Testcontainers core
-    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
-
-    // RabbitMQ container
-    testImplementation("org.testcontainers:rabbitmq:1.19.7")
-
-    // PostgreSQL container
-    testImplementation("org.testcontainers:postgresql:1.19.7")
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:rabbitmq")
+    testImplementation("org.testcontainers:postgresql")
 }
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed", "standardError", "standardOut")
+        showStandardStreams = true}
 }
 

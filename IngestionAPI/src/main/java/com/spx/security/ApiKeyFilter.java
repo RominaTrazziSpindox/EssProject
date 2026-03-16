@@ -39,7 +39,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     // The filter is only for this endpoint "/api/v1/crm/sync"
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getServletPath().equals("/api/v1/crm/sync");
+        return !request.getRequestURI().startsWith("/api/v1/crm");
     }
 
     @Override
