@@ -41,6 +41,15 @@ dependencies {
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // Testcontainers core
+    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+
+    // RabbitMQ container
+    testImplementation("org.testcontainers:rabbitmq:1.19.7")
+
+    // PostgreSQL container
+    testImplementation("org.testcontainers:postgresql:1.19.7")
 }
 
 tasks.test {
