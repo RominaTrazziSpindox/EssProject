@@ -3,6 +3,7 @@ package integrations;
 import com.spx.IngestionAPIApplication;
 import com.spx.config.RabbitConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.core.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.testcontainers.containers.RabbitMQContainer;
@@ -18,12 +18,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
-import java.util.Optional;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -58,12 +53,18 @@ class IngestionApiIntegrationTest {
      * This allows us to verify that the publisher sends messages to RabbitMQ.
      */
     @Autowired
-    @MockitoBean
     private RabbitTemplate rabbitTemplate;
 
     // MockMvc simulates HTTP requests (Get, Post...) without starting a real web server.
     @Autowired
     private MockMvc mockMvc;
+
+    // Temporary Queue for verifying message is sent to the Broker.
+    @Autowired
+    AmqpAdmin amqpAdmin;
+
+    Queue queue = new Queue("crm.campaign.queue", false);
+
 
     // Minimal valid payload representing a CRM campaign.
     private static final String VALID_PAYLOAD =
@@ -115,6 +116,45 @@ class IngestionApiIntegrationTest {
                 .andExpect(status().isAccepted());
     }
 
+    // ---------- MESSAGE PUBLISHING TEST ----------
+    @Test
+    void shouldPublishMessageToExchange() throws Exception {
+
+        System.out.println("RabbitMQ dashboard: " + rabbit.getHttpUrl());
+
+        // --- DEBUG QUEUE ---
+        Queue debugQueue = new Queue("debug.queue", false);
+        amqpAdmin.declareQueue(debugQueue);
+
+        // --- ALTERNATE EXCHANGE ---
+        FanoutExchange debugExchange = new FanoutExchange("debug.exchange");
+        amqpAdmin.declareExchange(debugExchange);
+
+        // --- BINDING ---
+        amqpAdmin.declareBinding(
+                BindingBuilder.bind(debugQueue).to(debugExchange)
+        );
+
+        // --- MAIN EXCHANGE WITH ALTERNATE ---
+        DirectExchange mainExchange = ExchangeBuilder
+                .directExchange("crm.exchange")
+                .alternate("debug.exchange")
+                .durable(false)
+                .build();
+
+        amqpAdmin.declareExchange(mainExchange);
+
+        // --- EXECUTE REQUEST ---
+        mockMvc.perform(genericRequest(API_KEY, VALID_PAYLOAD))
+                .andDo(print())
+                .andExpect(status().isAccepted());
+
+        // --- VERIFY MESSAGE ARRIVED ---
+        Object message = rabbitTemplate.receiveAndConvert("debug.queue");
+
+        assertThat(message).isNotNull();
+    }
+
     // ---------- SECURITY TEST ----------
     @Test
     void shouldReturn401WhenApiKeyMissing() throws Exception {
@@ -129,17 +169,6 @@ class IngestionApiIntegrationTest {
         mockMvc.perform(genericRequest(API_KEY, INVALID_PAYLOAD))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
-    }
-
-    // ---------- MESSAGE PUBLISHING TEST ----------
-    @Test
-    void shouldPublishMessageOnRabbit() throws Exception {
-        mockMvc.perform(genericRequest(API_KEY, VALID_PAYLOAD))
-                .andDo(print())
-                .andExpect(status().isAccepted());
-
-        verify(rabbitTemplate)
-                .convertAndSend(eq("crm.exchange"), eq("crm.campaign.created"), Optional.ofNullable(any()));
     }
 }
 
