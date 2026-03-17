@@ -2,21 +2,24 @@ package integrations;
 
 import com.spx.IngestionAPIApplication;
 import com.spx.config.RabbitConfig;
+import com.spx.dto.CrmIncomingCampaignDTO;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.testcontainers.containers.RabbitMQContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import tools.jackson.databind.ObjectMapper;
+
+import java.util.List;
+import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -27,72 +30,84 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = IngestionAPIApplication.class)
 @AutoConfigureMockMvc
 @Import(RabbitConfig.class)
-class IngestionApiIntegrationTest {
-
-    /*
-     * Testcontainer that starts a real RabbitMQ instance for the duration of the test suite.
-     * This allows us to test the application against a real broker instead of mocks.
-     */
-    @Container
-    static RabbitMQContainer rabbit = new RabbitMQContainer("rabbitmq:3-management");
-
-    /*
-     * Spring Boot dynamic properties override.
-     * The application will connect to the RabbitMQ container started by Testcontainers.
-     */
-    @DynamicPropertySource
-    static void configureRabbit(DynamicPropertyRegistry registry) {
-        registry.add("spring.rabbitmq.host", rabbit::getHost);
-        registry.add("spring.rabbitmq.port", rabbit::getAmqpPort);
-        registry.add("spring.rabbitmq.username", rabbit::getAdminUsername);
-        registry.add("spring.rabbitmq.password", rabbit::getAdminPassword);
-    }
-
-    /*
-     * MockitoBean replaces the real RabbitTemplate bean with a Mockito's one.
-     * This allows us to verify that the publisher sends messages to RabbitMQ.
-     */
-    @Autowired
-    private RabbitTemplate rabbitTemplate;
-
-    // MockMvc simulates HTTP requests (Get, Post...) without starting a real web server.
-    @Autowired
-    private MockMvc mockMvc;
-
-    // Temporary Queue for verifying message is sent to the Broker.
-    @Autowired
-    AmqpAdmin amqpAdmin;
-
-    Queue queue = new Queue("crm.campaign.queue", false);
-
-
-    // Minimal valid payload representing a CRM campaign.
-    private static final String VALID_PAYLOAD =
-            """
-            [
-              {
-                "campaignId": "C-00088102",
-                "subCampaignId": "SC-0091",
-                "attendees": [
-                  {
-                    "cn": "1002001",
-                    "firstName": "Matteo",
-                    "lastName": "Ricci",
-                    "birthDate": "1985-05-12",
-                    "partnerId": "1002001",
-                    "isCompanion": false,
-                    "qrCode": "testqr"
-                  }
-                ]
-              }
-            ]
-            """;
+class IngestionApiIntegrationTest extends AbstractRabbitContainerTest {
 
     // ---- Test constants ----
     private static final String ENDPOINT = "/api/v1/crm/sync";
     private static final String API_KEY_HEADER = "X-API-KEY";
     private static final String API_KEY = "secret-key";
     private static final String INVALID_PAYLOAD = "{ invalid json }";
+    private static final String QUEUE_NAME = "crm.campaign.queue";
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @Autowired
+    private RabbitAdmin rabbitAdmin;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setupRabbitTopology() {
+
+        Queue queue = new Queue(QUEUE_NAME);
+        DirectExchange exchange = new DirectExchange("crm.exchange");
+
+        rabbitAdmin.declareExchange(exchange);
+        rabbitAdmin.declareQueue(queue);
+
+        rabbitAdmin.declareBinding(
+                BindingBuilder.bind(queue)
+                        .to(exchange)
+                        .with("crm.campaign.created")
+        );
+    }
+
+    @BeforeEach
+    void cleanQueue() {
+        rabbitAdmin.purgeQueue(QUEUE_NAME, true);
+    }
+
+    // MockMvc simulates HTTP requests (Get, Post...) without starting a real web server.
+    @Autowired
+    private MockMvc mockMvc;
+
+    private static final String VALID_PAYLOAD =
+            """
+            [
+                          {
+                            "campaignId": "C-00088102",
+                            "subCampaignId": "SC-0091",
+                            "attendees": [
+                              {
+                                "cn": "1002001",
+                                "firstName": "Matteo",
+                                "lastName": "Ricci",
+                                "birthDate": "1985-05-12",
+                                "partnerId": "1002001",
+                                "isCompanion": false,
+                                "qrCode": "QR-1"
+                              }
+                            ]
+                          },
+                          {
+                            "campaignId": "C-00099211",
+                            "subCampaignId": null,
+                            "attendees": [
+                              {
+                                "cn": "AURORA99@WEB.COM",
+                                "firstName": "Aurora",
+                                "lastName": "Conti",
+                                "birthDate": "1999-07-14",
+                                "partnerId": "2003001",
+                                "isCompanion": false,
+                                "qrCode": "QR-2"
+                              }
+                            ]
+                          }
+                        ]
+            """;
 
     // Parametrized helper method that builds a CRM request.
     private MockHttpServletRequestBuilder genericRequest(String apiKey, String payload) {
@@ -116,45 +131,6 @@ class IngestionApiIntegrationTest {
                 .andExpect(status().isAccepted());
     }
 
-    // ---------- MESSAGE PUBLISHING TEST ----------
-    @Test
-    void shouldPublishMessageToExchange() throws Exception {
-
-        System.out.println("RabbitMQ dashboard: " + rabbit.getHttpUrl());
-
-        // --- DEBUG QUEUE ---
-        Queue debugQueue = new Queue("debug.queue", false);
-        amqpAdmin.declareQueue(debugQueue);
-
-        // --- ALTERNATE EXCHANGE ---
-        FanoutExchange debugExchange = new FanoutExchange("debug.exchange");
-        amqpAdmin.declareExchange(debugExchange);
-
-        // --- BINDING ---
-        amqpAdmin.declareBinding(
-                BindingBuilder.bind(debugQueue).to(debugExchange)
-        );
-
-        // --- MAIN EXCHANGE WITH ALTERNATE ---
-        DirectExchange mainExchange = ExchangeBuilder
-                .directExchange("crm.exchange")
-                .alternate("debug.exchange")
-                .durable(false)
-                .build();
-
-        amqpAdmin.declareExchange(mainExchange);
-
-        // --- EXECUTE REQUEST ---
-        mockMvc.perform(genericRequest(API_KEY, VALID_PAYLOAD))
-                .andDo(print())
-                .andExpect(status().isAccepted());
-
-        // --- VERIFY MESSAGE ARRIVED ---
-        Object message = rabbitTemplate.receiveAndConvert("debug.queue");
-
-        assertThat(message).isNotNull();
-    }
-
     // ---------- SECURITY TEST ----------
     @Test
     void shouldReturn401WhenApiKeyMissing() throws Exception {
@@ -170,6 +146,51 @@ class IngestionApiIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
+
+    // ---------- MESSAGE PUBLISHING TEST ----------
+    @Test
+    void shouldPublishMessageToExchange() throws Exception {
+
+        // STEP 1: Perform the Success case
+        mockMvc.perform(genericRequest(API_KEY, VALID_PAYLOAD))
+                .andDo(print())
+                .andExpect(status().isAccepted());
+
+        // STEP 2: Retrieve the metadata/properties of the specific queue from the RabbitAdmin
+        Properties queueProperties = rabbitAdmin.getQueueProperties(QUEUE_NAME);
+        assert queueProperties != null;
+
+        // STEP 3: Extract the message count. RabbitAdmin returns raw Properties, so they can be converted from String to Integer
+        Object raw = queueProperties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT);
+        int messageCount = Integer.parseInt(raw.toString());
+
+        // STEP 4: Assert that the queue exists and contains exactly 2 messages as expected from the payload
+        assertThat(queueProperties).isNotNull();
+        assertThat(messageCount).isEqualTo(2);
+
+        // STEP 5: Pull messages from the queue for inspection; timeout is for managing a potential asynchronous processing delays
+        Message firstMessage = rabbitTemplate.receive(QUEUE_NAME, 15000);
+        Message secondMessage = rabbitTemplate.receive(QUEUE_NAME, 15000);
+
+        // STEP 6: Ensure that both messages were successfully captured from the broker
+        assertThat(firstMessage).isNotNull();
+        assertThat(secondMessage).isNotNull();
+
+        // STEP 7: Deserialization: Convert JSON message bodies back into Java Objects (DTOs)
+        CrmIncomingCampaignDTO firstCampaign = objectMapper.readValue(firstMessage.getBody(), CrmIncomingCampaignDTO.class);
+        CrmIncomingCampaignDTO secondCampaign =  objectMapper.readValue(secondMessage.getBody(), CrmIncomingCampaignDTO.class);
+
+        /* Assert: Verify that the campaign IDs match the expected values 'containsExactlyInAnyOrder' is used because message
+        delivery order isn't always strictly guaranteed */
+        assertThat(List.of(firstCampaign.getCampaignId(), secondCampaign.getCampaignId())).containsExactlyInAnyOrder("C-00088102", "C-00099211");
+
+        // Stop container (custom lifecycle)
+        stopContainer();
+    }
 }
+
+
+
+
 
 
