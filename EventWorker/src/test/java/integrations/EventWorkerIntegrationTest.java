@@ -69,7 +69,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldConsumeMessageAndPersistCampaign() {
 
-        CampaignEventDTO campaignEventDTO = TestDataFactory.campaignWithSingleAttendee();
+        CampaignEventDTO campaignEventDTO = TestDataFactory.builderValidCampaignDTO("C-1", "SC-1", 1);
 
         publish(campaignEventDTO);
 
@@ -89,7 +89,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     void shouldReplaceAttendeesOnUpdate() {
 
         // STEP 1 - publish first message campaign (2 attendees)
-        CampaignEventDTO firstCampaignEventDTO = TestDataFactory.campaignWithMultipleAttendees(2);
+        CampaignEventDTO firstCampaignEventDTO = TestDataFactory.builderValidCampaignDTO("C-1", "SC-1", 2);
 
         publish(firstCampaignEventDTO);
 
@@ -102,7 +102,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
         });
 
         // STEP 2 - publish second message campaign (1 attendee, same campaign)
-        CampaignEventDTO secondCampaignEventDTO = TestDataFactory.campaignWithSingleAttendeeAndSameId();
+        CampaignEventDTO secondCampaignEventDTO = TestDataFactory.builderValidCampaignDTO("C-1", "SC-1", 1);
 
         publish(secondCampaignEventDTO);
 
@@ -118,7 +118,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldBeIdempotent_whenSameMessageIsProcessedTwice() {
 
-        CampaignEventDTO validCampaignDTO = TestDataFactory.campaignWithMultipleAttendees(2);
+        CampaignEventDTO validCampaignDTO = TestDataFactory.builderValidCampaignDTO("C-1", "SC-1", 2);
 
         // First processing
         publish(validCampaignDTO);
@@ -138,7 +138,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldSendMessageToDLQOnFailure() {
 
-        CampaignEventDTO invalidCampaignDTO = TestDataFactory.invalidCampaign();
+        CampaignEventDTO invalidCampaignDTO = TestDataFactory.builderInvalidCampaignDTO();
 
         publish(invalidCampaignDTO);
 
@@ -153,7 +153,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldRouteFailedMessageToDLQ_withCorrectPayload() {
 
-        CampaignEventDTO invalidCampaignDTO = TestDataFactory.invalidCampaign();
+        CampaignEventDTO invalidCampaignDTO = TestDataFactory.builderInvalidCampaignDTO();
 
         publish(invalidCampaignDTO);
 
@@ -184,6 +184,4 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
                 dto.getSubCampaignId()
         );
     }
-
-
 }
