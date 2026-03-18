@@ -34,7 +34,7 @@ public class CampaignListener {
 
         } catch (Exception e) {
 
-            log.error("Error processing campaign {}", campaignEventDTO.getCampaignId(), e);
+            log.error("Error processing campaign - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), e);
 
             // If the message fails, move it to the DLQ and remove from the current Queue
             throw new AmqpRejectAndDontRequeueException(e);

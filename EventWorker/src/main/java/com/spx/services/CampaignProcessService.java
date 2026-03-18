@@ -56,7 +56,7 @@ public class CampaignProcessService {
     @Transactional
     public void processCampaignFromRabbit(CampaignEventDTO campaignEventDTO) {
 
-        log.info("Processing campaign event - campaignId: {}, subCampaignId: {}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
+        log.info("Processing campaign event: [{} - {}] with {} attendees", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), campaignEventDTO.getAttendees().size());
 
         // STEP 1: Try to retrieve a Campaign using the business key composed of: campaignId + subCampaignId (it retrieves: Optional.empty() or Optional<Campaign>)
         Optional<Campaign> optionalCampaign = campaignRepository.findByCampaignIdAndSubCampaignId(campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
@@ -91,18 +91,21 @@ public class CampaignProcessService {
                 attendee -> attendee.setCampaign(campaign)
         );
 
-        // Step 5: Clear old list of attendees and add the new one for ensuring full state synchronization
-        campaign.getAttendees().clear();
-        campaignRepository.flush(); // Force deleting before inserting new attendees
-
-        for (Attendee attendee : attendees) {
-            campaign.addAttendee(attendee);
-        }
+        // Step 5: Clear old list of attendees and add the new one for ensuring full state synchronization (see below: helper method)
+        replaceAttendees(campaign, attendees);
 
         // Step 6: Persist the campaign and all its attendees together (due to CascadeType.ALL operations on Campaign entity are extended to Attendee entity)
         campaignRepository.save(campaign);
 
         log.info("Campaign processed successfully - campaignId: {}, subCampaignId: {}, attendees: {}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), attendees.size());
 
+    }
+
+
+    // HELPER METHOD
+    private void replaceAttendees(Campaign campaign, List<Attendee> attendees) {
+        campaign.getAttendees().clear();
+        campaignRepository.flush();
+        attendees.forEach(campaign::addAttendee);
     }
 }
