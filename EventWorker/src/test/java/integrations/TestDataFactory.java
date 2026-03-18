@@ -1,4 +1,5 @@
 package integrations;
+
 import com.spx.dto.AttendeeDTO;
 import com.spx.dto.CampaignEventDTO;
 
@@ -8,60 +9,47 @@ import java.util.stream.IntStream;
 
 public class TestDataFactory {
 
-    public static CampaignEventDTO campaignWithSingleAttendee() {
-        return CampaignEventDTO.builder()
-                .campaignId("C-TEST-SINGLE-ATTENDEE")
-                .subCampaignId("SC-1")
-                .attendees(List.of(attendee("Matteo")))
-                .build();
-    }
+    public static CampaignEventDTO builderValidCampaignDTO(
+            String campaignId,
+            String subCampaignId,
+            int attendeesCount) {
 
-    public static CampaignEventDTO campaignWithMultipleAttendees(int count) {
         return CampaignEventDTO.builder()
-                .campaignId("C-TEST-MULTIPLE-ATTENDEES")
-                .subCampaignId("SC-2")
+                .campaignId(campaignId)
+                .subCampaignId(subCampaignId)
                 .attendees(
-                        IntStream.range(0, count)
-                                .mapToObj(i -> attendee("Name" + i))
+                        IntStream.range(0, attendeesCount)
+                                .mapToObj(TestDataFactory::attendee)
                                 .toList()
                 )
                 .build();
     }
 
-    public static CampaignEventDTO campaignWithSingleAttendeeAndSameId() {
+    public static CampaignEventDTO builderInvalidCampaignDTO() {
         return CampaignEventDTO.builder()
-                .campaignId("C-TEST-SINGLE-ATTENDEE-SAME-ID")
-                .subCampaignId("SC-2")
-                .attendees(List.of(attendee("OnlyOne")))
-                .build();
-    }
-
-    public static CampaignEventDTO invalidCampaign() {
-        return CampaignEventDTO.builder()
-                .campaignId("C-ERR-CAMPAIGN")
-                .subCampaignId("SC-ERR-CAMPAIGN")
+                .campaignId("C-ERR")
+                .subCampaignId("SC-ERR")
                 .attendees(List.of(
                         AttendeeDTO.builder()
-                                .firstName(null) // caused error
+                                .firstName(null) // trigger validation error
                                 .lastName("Error")
                                 .partnerId("1")
                                 .isCompanion(false)
-                                .qrCode("qr")
+                                .qrCode("qr-error")
                                 .build()
                 ))
                 .build();
     }
 
-    private static AttendeeDTO attendee(String name) {
+    private static AttendeeDTO attendee(int index) {
         return AttendeeDTO.builder()
-                .firstName(name)
+                .firstName("Name" + index)
                 .lastName("Test")
                 .birthDate(LocalDate.of(1990, 1, 1))
-                .partnerId("1")
-                .cn("cn")
+                .partnerId("P-" + index)
+                .cn("cn-" + index)
                 .isCompanion(false)
-                .qrCode("qr-" + name)
+                .qrCode("qr-" + index)
                 .build();
     }
-
 }
