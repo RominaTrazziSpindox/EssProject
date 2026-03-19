@@ -13,22 +13,26 @@ repositories {
 }
 
 dependencies {
+
+    // --- Spring ---
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
-    implementation ("com.fasterxml.jackson.core:jackson-databind")
 
+    // --- Serialization ---
+    implementation("com.fasterxml.jackson.core:jackson-databind")
+
+    // --- Database ---
     runtimeOnly("org.postgresql:postgresql")
 
+    // --- Lombok ---
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
-
-    // Test
+    // --- Testing ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 
-    // Testcontainers core
     testImplementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:rabbitmq")
@@ -39,6 +43,6 @@ tasks.test {
     useJUnitPlatform()
     testLogging {
         events("passed", "skipped", "failed", "standardError", "standardOut")
-        showStandardStreams = true}
+        showStandardStreams = true
+    }
 }
-

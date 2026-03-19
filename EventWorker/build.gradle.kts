@@ -12,46 +12,46 @@ repositories {
     maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
+const val mapstructVersion = "1.6.0"
+const val lombokMapstructBindingVersion = "0.2.0"
+
 dependencies {
 
-    // Tomcat
-    implementation ("org.springframework.boot:spring-boot-starter-web")
-
-    // MapStruct
-    implementation("org.mapstruct:mapstruct:1.6.0")
-    annotationProcessor("org.mapstruct:mapstruct-processor:1.6.0")
-
-    // JPA (Hibernate)
+    // --- Spring ---
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-
-    // Postgres driver
-    implementation("org.postgresql:postgresql")
-    runtimeOnly("org.postgresql:postgresql")
-
-    // RabbitMQ
     implementation("org.springframework.boot:spring-boot-starter-amqp")
-
-    // Lombok
-    compileOnly("org.projectlombok:lombok")
-    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
-    annotationProcessor("org.projectlombok:lombok")
-
-    // Valid
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
-    // Test
+
+    // --- Mapping ---
+    implementation("org.mapstruct:mapstruct:$mapstructVersion")
+    annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+
+    // --- Database ---
+    runtimeOnly("org.postgresql:postgresql")
+
+    // --- Lombok ---
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:$lombokMapstructBindingVersion")
+
+    // --- Testing ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    // Testcontainers core
-    testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+    testImplementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:rabbitmq")
+    testImplementation("org.testcontainers:postgresql")
 
-    // RabbitMQ container
-    testImplementation("org.testcontainers:rabbitmq:1.19.7")
-
-    // PostgreSQL container
-    testImplementation("org.testcontainers:postgresql:1.19.7")
+    testCompileOnly("org.projectlombok:lombok")
+    testAnnotationProcessor("org.projectlombok:lombok")
 }
 
 tasks.test {
     useJUnitPlatform()
+    testLogging {
+        events("passed", "skipped", "failed", "standardError", "standardOut")
+        showStandardStreams = true
+    }
 }
