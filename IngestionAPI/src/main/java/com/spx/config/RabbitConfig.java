@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import tools.jackson.databind.json.JsonMapper;
 
 @Configuration
-@EnableConfigurationProperties(RabbitConfigProperties.class)
+@EnableConfigurationProperties(RabbitProperties.class)
 public class RabbitConfig {
 
     // -------- JSON Converter --------

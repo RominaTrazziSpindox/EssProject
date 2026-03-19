@@ -11,17 +11,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitConfig {
 
-    // Inject the Queue's name from application.yaml. It must be equal to the one into Producer
-    @Value("${app.rabbit.queue}")
-    private String campaignQueue;
+    // Constructor injection (of Rabbit properties)
+    private final RabbitProperties rabbitProperties;
 
-    // Exchange and routing key used by the producer (Main)
-    private static final String EXCHANGE = "crm.exchange";
-    private static final String ROUTING_KEY = "crm.campaign.created";
-
-    // Create DLX and DLQ constants for DLQ Queue and DLX Exchange
-    private static final String DLX = "crm.dlx";
-    private static final String DLQ = "crm.campaigns.dlq";
+    public RabbitConfig(RabbitProperties rabbitProperties) {
+        this.rabbitProperties = rabbitProperties;
+    }
 
     /**
      * Main Queue
@@ -30,9 +25,9 @@ public class RabbitConfig {
      */
     @Bean
     public Queue campaignQueue() {
-        return QueueBuilder.durable(campaignQueue)
-                .withArgument("x-dead-letter-exchange", DLX)
-                .withArgument("x-dead-letter-routing-key", campaignQueue)
+        return QueueBuilder.durable(rabbitProperties.getQueue())
+                .withArgument("x-dead-letter-exchange", rabbitProperties.getDlx())
+                .withArgument("x-dead-letter-routing-key", rabbitProperties.getQueue())
                 .build();
     }
 
@@ -42,7 +37,7 @@ public class RabbitConfig {
      */
     @Bean
     public DirectExchange crmExchange() {
-        return new DirectExchange(EXCHANGE);
+        return new DirectExchange(rabbitProperties.getExchange());
     }
 
     /**
@@ -53,7 +48,7 @@ public class RabbitConfig {
         return BindingBuilder
                 .bind(campaignQueue())
                 .to(crmExchange())
-                .with(ROUTING_KEY);
+                .with(rabbitProperties.getRoutingKey());
     }
 
     // Secondary Queue //
@@ -61,13 +56,13 @@ public class RabbitConfig {
     // Dead Letter Queue
     @Bean
     public Queue deadLetterQueue() {
-        return QueueBuilder.durable(DLQ).build();
+        return QueueBuilder.durable(rabbitProperties.getDlq()).build();
     }
 
     // Dead Letter Exchange
     @Bean
     public DirectExchange deadLetterExchange() {
-        return new DirectExchange(DLX);
+        return new DirectExchange(rabbitProperties.getDlx());
     }
 
     // Binding DLQ → DLX
@@ -76,9 +71,8 @@ public class RabbitConfig {
         return BindingBuilder
                 .bind(deadLetterQueue())
                 .to(deadLetterExchange())
-                .with(campaignQueue);
+                .with(rabbitProperties.getQueue());
     }
-
 
     // -------- JSON Converter: converter used to deserialize JSON messages coming from RabbitMQ into DTO objects. --------
     @Bean
@@ -108,6 +102,9 @@ public class RabbitConfig {
         // Use between 2 and 5 Consumer together
         rabbitListenerContainerFactory.setConcurrentConsumers(2);
         rabbitListenerContainerFactory.setMaxConcurrentConsumers(5);
+
+        // Prevent message requeue after retries are exhausted → message goes to DLQ
+        rabbitListenerContainerFactory.setDefaultRequeueRejected(false);
 
         return rabbitListenerContainerFactory;
     }
