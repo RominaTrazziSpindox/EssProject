@@ -12,8 +12,8 @@ repositories {
     maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-const val mapstructVersion = "1.6.0"
-const val lombokMapstructBindingVersion = "0.2.0"
+val mapstructVersion = "1.6.0"
+val lombokMapstructBindingVersion = "0.2.0"
 
 dependencies {
 
