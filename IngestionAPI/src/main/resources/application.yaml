@@ -1,7 +1,7 @@
 spring:
   application:
     name: ingestion-api
-  rabbitmq:
+  RabbitMQ:
     host: localhost
     port: 5672
     username: guest
@@ -11,7 +11,6 @@ app:
   rabbit:
     exchange: crm.exchange
     routing-key: crm.campaign.created
-    queue: crm.campaign.queue
 
 logging:
   level:
