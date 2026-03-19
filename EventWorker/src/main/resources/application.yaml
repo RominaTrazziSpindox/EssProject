@@ -5,11 +5,18 @@ spring:
     init:
       mode: never
 
-  rabbitmq:
+  RabbitMQ:
     host: localhost
     port: 5672
     username: guest
     password: guest
+
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000
 
   datasource:
     url: jdbc:postgresql://localhost:5432/ess_data
@@ -28,6 +35,10 @@ spring:
 app:
   rabbit:
     queue: crm.campaign.queue
+    exchange: crm.exchange
+    routing-key: crm.campaign.created
+    dlq: crm.campaigns.dlq
+    dlx: crm.dlx
 
 server:
   port: 8081
