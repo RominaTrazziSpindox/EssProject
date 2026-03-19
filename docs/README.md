@@ -15,19 +15,21 @@ It consists of two main services:
 
 ## 🧱 Architecture
 
+The system is built following an event-driven architecture to ensure scalability, resilience, and decoupling between components.
+
 CRM → Ingestion API → RabbitMQ → Event Worker → PostgreSQL
 
-### Flow:
+### Flow
 
-1. CRM sends a bulk payload of campaigns
-2. Ingestion API:
-    - validates input
-    - splits payload into single campaigns
-    - publishes messages to RabbitMQ
-3. Event Worker:
-    - consumes messages
-    - synchronizes database state
-    - routes failed messages to a Dead Letter Queue (DLQ)
+1. The CRM sends a bulk payload containing multiple campaigns.
+2. The Ingestion API:
+    - validates the incoming request
+    - splits the payload into individual campaign messages
+    - publishes each message to RabbitMQ
+3. The Event Worker:
+    - consumes messages asynchronously from the queue
+    - performs full-state synchronization on the database
+    - routes failed messages to a Dead Letter Queue (DLQ) after retry attempts
 
 ---
 
@@ -44,7 +46,7 @@ flowchart LR
 
     QUEUE -->|Consume| WORKER[Event Worker]
 
-    WORKER -->|Full State Sync| DB[(PostgreSQL)]
+    WORKER -->|Full State Sync| DB[(PostgresSQL)]
 
     WORKER -->|On Failure| DLQ[Dead Letter Queue]
 
@@ -124,11 +126,11 @@ security:
 
 - Responses:
 
-| Scenario                     | Response        |
-|----------------------------|-----------------|
-| Valid request              | 202 Accepted    |
-| Invalid JSON / validation  | 400 Bad Request |
-| Missing / wrong API Key    | 401 Unauthorized|
+| Scenario                   | Response          |
+|----------------------------|-------------------|
+| Valid request              | 202 Accepted      |
+| Invalid JSON / validation  | 400 Bad Request   |
+| Missing / wrong API Key    | 401 Unauthorized  |
 
 ---
 
@@ -205,6 +207,17 @@ The system is designed to treat every incoming payload as a **source of truth sn
 - DTOs decouple API and persistence layers
 - RabbitMQ enables asynchronous processing and resilience
 
+## ⚙️ Fault Tolerance
+
+The system ensures resilience through:
+
+- Retry mechanism (max 3 attempts)
+- Dead Letter Queue (DLQ) for failed messages
+- Idempotent processing logic in the consumer
+- Transactional database operations
+
+Failed messages are automatically routed to the DLQ after retries are exhausted.
+
 ---
 
 ## 🐳 Running the application (local environment with Docker)
@@ -226,7 +239,7 @@ docker-compose down
 
 ### Services
 
-| Service              | Port  |
+| Service             | Port  |
 |---------------------|-------|
 | PostgreSQL          | 5432  |
 | RabbitMQ            | 5672  |
@@ -321,7 +334,13 @@ There is also an "infrastructure" folder that contains the `docker-compose.yml` 
 
 ## 🧪 Testing Strategy
 
-The project includes both unit and integration tests to validate the behavior of each component and the overall message flow.
+Integration tests are implemented using Testcontainers:
+
+- RabbitMQ container for messaging
+- PostgreSQL container for persistence
+- Full end-to-end flow testing
+
+Containers are started automatically during test execution.
 
 ### Ingestion API
 
