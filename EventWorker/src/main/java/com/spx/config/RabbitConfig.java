@@ -95,20 +95,20 @@ public class RabbitConfig {
      * @return the simple rabbit listener container factory
      */
     @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactoryCreator (ConnectionFactory connectionFactory, JacksonJsonMessageConverter messageConverter) {
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory (ConnectionFactory connectionFactory, JacksonJsonMessageConverter messageConverter) {
 
-        SimpleRabbitListenerContainerFactory rabbitListenerFactory = new SimpleRabbitListenerContainerFactory();
+        SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory = new SimpleRabbitListenerContainerFactory();
 
         // Set the connection as connectionFactory object
-        rabbitListenerFactory.setConnectionFactory(connectionFactory);
+        rabbitListenerContainerFactory.setConnectionFactory(connectionFactory);
 
         // Convert the incoming JSON from Rabbit into DTO object
-        rabbitListenerFactory.setMessageConverter(messageConverter);
+        rabbitListenerContainerFactory.setMessageConverter(messageConverter);
 
         // Use between 2 and 5 Consumer together
-        rabbitListenerFactory.setConcurrentConsumers(2);
-        rabbitListenerFactory.setMaxConcurrentConsumers(5);
+        rabbitListenerContainerFactory.setConcurrentConsumers(2);
+        rabbitListenerContainerFactory.setMaxConcurrentConsumers(5);
 
-        return rabbitListenerFactory;
+        return rabbitListenerContainerFactory;
     }
 }

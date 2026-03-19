@@ -27,21 +27,20 @@ public class CampaignListener {
     @RabbitListener(queues = {"${app.rabbit.queue}"})
     public void consumeCampaign(CampaignEventDTO campaignEventDTO) {
 
+        log.info("Received campaign event from queue - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
+
         try {
 
-            // Call service layer and its method
             campaignProcessService.processCampaignFromRabbit(campaignEventDTO);
 
-        } catch (Exception e) {
+            log.info("Successfully processed campaign - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
 
-            log.error("Error processing campaign - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), e);
+        } catch (RuntimeException ex) {
 
-            // If the message fails, move it to the DLQ and remove from the current Queue
-            throw new AmqpRejectAndDontRequeueException(e);
+            // Error handling
+
+            log.error("Error processing campaign - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), ex);
+            throw new AmqpRejectAndDontRequeueException(ex);
         }
-
-        log.info( "Received campaign event from queue - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
-
-
     }
 }
