@@ -13,13 +13,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -28,17 +31,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @Testcontainers
 @SpringBootTest(classes = IngestionAPIApplication.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @AutoConfigureMockMvc
 @Import(RabbitConfig.class)
 class IngestionApiIntegrationTest extends AbstractRabbitContainerTest {
 
-    // ---- Test constants ----
+    // Constants
     private static final String ENDPOINT = "/api/v1/crm/sync";
     private static final String API_KEY_HEADER = "X-API-KEY";
     private static final String API_KEY = "secret-key";
     private static final String INVALID_PAYLOAD = "{ invalid json }";
     private static final String QUEUE_NAME = "crm.campaign.queue";
 
+    // Injections
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -156,21 +161,28 @@ class IngestionApiIntegrationTest extends AbstractRabbitContainerTest {
                 .andDo(print())
                 .andExpect(status().isAccepted());
 
-        // STEP 2: Retrieve the metadata/properties of the specific queue from the RabbitAdmin
-        Properties queueProperties = rabbitAdmin.getQueueProperties(QUEUE_NAME);
-        assert queueProperties != null;
+        // STEP 2: Wait until RabbitMQ has received all expected messages (asynchronous handling)
+        Awaitility.await()
+                .atMost(5, TimeUnit.SECONDS)
+                .untilAsserted(() -> {
 
-        // STEP 3: Extract the message count. RabbitAdmin returns raw Properties, so they can be converted from String to Integer
-        Object raw = queueProperties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT);
-        int messageCount = Integer.parseInt(raw.toString());
+                    // STEP 2.1: Retrieve the metadata/properties of the specific queue from RabbitAdmin
+                    Properties queueProperties = rabbitAdmin.getQueueProperties(QUEUE_NAME);
 
-        // STEP 4: Assert that the queue exists and contains exactly 2 messages as expected from the payload
-        assertThat(queueProperties).isNotNull();
-        assertThat(messageCount).isEqualTo(2);
+                    // STEP 2.2: Assert that the queue exists
+                    assertThat(queueProperties).isNotNull();
+
+                    //STEP 3: Extract the message count. RabbitAdmin returns raw Properties, so they must be converted from String to Integer
+                    Object raw = queueProperties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT);
+                    int messageCount = Integer.parseInt(raw.toString());
+
+                    // STEP 4: Assert that the queue contains exactly 2 messages as expected from the payload
+                    assertThat(messageCount).isEqualTo(2);
+                });
 
         // STEP 5: Pull messages from the queue for inspection; timeout is for managing a potential asynchronous processing delays
-        Message firstMessage = rabbitTemplate.receive(QUEUE_NAME, 15000);
-        Message secondMessage = rabbitTemplate.receive(QUEUE_NAME, 15000);
+        Message firstMessage = rabbitTemplate.receive(QUEUE_NAME, 1000);
+        Message secondMessage = rabbitTemplate.receive(QUEUE_NAME, 1000);
 
         // STEP 6: Ensure that both messages were successfully captured from the broker
         assertThat(firstMessage).isNotNull();
@@ -184,8 +196,6 @@ class IngestionApiIntegrationTest extends AbstractRabbitContainerTest {
         delivery order isn't always strictly guaranteed */
         assertThat(List.of(firstCampaign.getCampaignId(), secondCampaign.getCampaignId())).containsExactlyInAnyOrder("C-00088102", "C-00099211");
 
-        // Stop container (custom lifecycle)
-        stopContainer();
     }
 }
 

@@ -19,16 +19,6 @@ public abstract class AbstractRabbitContainerTest {
         System.out.println("RabbitMQ started at: " + rabbit.getHost() + ":" + rabbit.getAmqpPort());
     }
 
-    protected static void stopContainer() {
-        try {
-            System.out.println("Delaying container shutdown...");
-            Thread.sleep(90000);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-        rabbit.stop();
-    }
-
     /*
      * Spring Boot dynamic properties override.
      * The application will connect to the RabbitMQ container started by Testcontainers.
