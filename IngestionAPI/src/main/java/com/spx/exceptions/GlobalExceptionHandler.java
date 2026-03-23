@@ -2,6 +2,7 @@ package com.spx.exceptions;
 
 import com.spx.dto.ApiErrorDTO;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpException;
 import org.springframework.http.HttpStatus;
@@ -9,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.HandlerMethodValidationException;
+
 
 import java.time.LocalDateTime;
 
@@ -69,15 +70,15 @@ public class GlobalExceptionHandler {
      * - etc.
      *
      * Spring validates the DTO automatically before the controller method
-     * executes. If validation fails, a MethodArgumentNotValidException is thrown.
+     * executes. If validation fails, a ConstraintViolationdException is thrown.
      *
      * We extract the first validation error to return a readable message
      * indicating which field failed validation.
      */
-    @ExceptionHandler(HandlerMethodValidationException.class)
-    public ResponseEntity<ApiErrorDTO> handleValidation(HandlerMethodValidationException ex,HttpServletRequest request) {
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorDTO> handleValidation(ConstraintViolationException ex, HttpServletRequest request) {
 
-        log.error("Validation JSON request on {} - {}", request.getRequestURI(), ex.getMessage());
+        log.error("Validation request on {} - {}", request.getRequestURI(), ex.getMessage());
 
         return buildResponseError(HttpStatus.BAD_REQUEST,"Validation Error","Request validation failed","Check request fields", request.getRequestURI());
     }

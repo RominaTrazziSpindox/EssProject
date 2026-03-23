@@ -114,6 +114,27 @@ class IngestionApiIntegrationTest extends AbstractRabbitContainerTest {
                         ]
             """;
 
+    private static final String NULL_PAYLOAD =
+        """
+       [
+          {
+            "campaignId": null,
+            "subCampaignId": "SC-0091",
+            "attendees": [
+              {
+                "cn": "1002001",
+                "firstName": "Matteo",
+                "lastName": "Ricci",
+                "birthDate": "1985-05-12",
+                "partnerId": "1002001",
+                "isCompanion": false,
+                "qrCode": "QR-1"
+              }
+            ]
+          }
+        ]
+       """;
+
     // Parametrized helper method that builds a CRM request.
     private MockHttpServletRequestBuilder genericRequest(String apiKey, String payload) {
 
@@ -148,6 +169,13 @@ class IngestionApiIntegrationTest extends AbstractRabbitContainerTest {
     @Test
     void shouldReturn400WhenPayloadMalformed() throws Exception {
         mockMvc.perform(genericRequest(API_KEY, INVALID_PAYLOAD))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400WhenPayloadValidationFails() throws Exception {
+        mockMvc.perform(genericRequest(API_KEY, NULL_PAYLOAD))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
     }
