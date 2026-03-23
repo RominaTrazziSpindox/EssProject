@@ -32,7 +32,7 @@ public class CrmController {
     /* It receives the list of the incoming campaigns + attendees from the CRM (in DTO format)
     and retrieve a Void entity + a 202 Accepted HTTP status code */
     @PostMapping("/v1/crm/sync")
-    public ResponseEntity<CrmSyncResponseDTO> syncCampaigns(@RequestBody List<@Valid CrmIncomingCampaignDTO> campaigns) {
+    public ResponseEntity<CrmSyncResponseDTO> syncCampaigns(@Valid @RequestBody List<@Valid CrmIncomingCampaignDTO> campaigns) {
 
         // Call the method which split every campaign in a single message for RabbitTemplate
         crmSyncService.processBatch(campaigns);
