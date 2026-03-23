@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ess_data"]
+      test: ["CMD", "pg_isready -U postgres -d ess_data"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,7 +22,10 @@ services:
       - "5672:5672"
       - "15672:15672"
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+
+      # Use `gosu` to run the RabbitMQ health check as the `rabbitmq` user.
+      # Without it, Docker runs the health check command as `root`, and the check fails.
+      test: ["CMD", "gosu", "rabbitmq", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       timeout: 5s
       retries: 5
