@@ -30,6 +30,7 @@ public class CampaignListener {
         log.info("Received campaign event from queue - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId());
 
         try {
+            // For testing DLQ throw new RuntimeException("DLQ test")
 
             campaignProcessService.processCampaignFromRabbit(campaignEventDTO);
 
