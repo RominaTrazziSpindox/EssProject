@@ -15,23 +15,25 @@ function BlueColumn() {
           <span>
             <i className="fa-regular fa-house"></i>
           </span>
-          <span className="icon_text">Dashboard</span>
+          <a href="http://www.localhost:3000/" className="icon_text">Dashboard</a>
         </p>
         <p>
           <span>
             <i className="fa-solid fa-chart-line"></i>
           </span>
-          <span className="icon_text">Reports</span>
+          <a href="http://www.localhost:3000/reports" className="icon_text">Reports</a>
         </p>
       </div>
 
       <hr></hr>
 
-      <button>
-        <i className="fa-solid fa-power-off"></i>
-        <span className="icon_text">Logout</span>
-      
-      </button>
+      <div className="logout">
+
+        <button>
+          <i className="fa-solid fa-power-off"></i>
+          <a href="http://www.localhost:3000/" className="icon_text">Logout</a>
+        </button>
+      </div>
 
     </aside>
   )

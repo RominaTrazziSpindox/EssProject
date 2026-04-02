@@ -1,10 +1,18 @@
+import BlueColumn from './components/BlueColumn.jsx'
+
 function App() {
-  return (
-    <div>
-      <h1>ESS Frontend</h1>
-      <p>Frontend prova di avvio.</p>
-    </div>
-  )
+   
+
+    return (
+       
+        <div>
+            <BlueColumn />
+        </div>
+
+
+    )
 }
 
-export default App
+
+
+export default App;
