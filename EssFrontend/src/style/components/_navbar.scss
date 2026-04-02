@@ -1,11 +1,11 @@
-.navbar {
-  height: 10vh;
+.navbar_container {
   border: 1px solid var(--ess-border);
   background-color: var(--ess-bg-navbar);
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 
   h1 {
     font-family: 'Barlow', sans-serif;

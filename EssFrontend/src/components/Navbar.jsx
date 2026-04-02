@@ -2,7 +2,7 @@ function Navbar() {
 
 
   return (
-    <nav className="navbar">
+    <div className="navbar_container">
 
       <div>
         <h1>Campaigns Generator</h1>
@@ -38,7 +38,7 @@ function Navbar() {
           </a>
       </div>
       
-    </nav>
+    </div>
   )
 }
 
