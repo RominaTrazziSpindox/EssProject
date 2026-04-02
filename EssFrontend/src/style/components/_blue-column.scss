@@ -1,0 +1,48 @@
+.blue-column {
+  background: linear-gradient(180deg, var(--ess-blue-800) 0%, var(--ess-blue-900) 100%);
+  width: 20%;
+  height: 100%;
+  color: var(--ess-text-100);
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 34px;
+
+  hr {
+    width: 100%;
+    color: var(--ess-text-100);
+  }
+
+  .institution_name {
+    font-family: var(--ess-font-ui);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 3rem;
+    text-align: center;
+    margin-bottom: 0;
+  }
+
+  .institution_division {
+    text-align: center;
+    font-size: 2rem;
+  }
+
+  .control_panel {
+    :first-child {
+      font-weight: bolder;
+      font-size: 1.2rem;
+    }
+
+    & span.icon_text {
+      padding-left: 1rem;
+      font-size: 1.2rem;
+    }
+  }
+
+  button {
+    .icon_text {
+      padding-left: 1rem;
+      font-size: 1.2rem;
+    }
+  }
+}
