@@ -42,6 +42,10 @@
     align-items: center;
     gap: 0.5rem;
     padding-right: 1rem;
+
+    i {
+      color: var(--ess-text-900);
+    }
   }
 
 }
