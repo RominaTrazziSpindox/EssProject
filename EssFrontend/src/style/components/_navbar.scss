@@ -1,0 +1,47 @@
+.navbar {
+  height: 10vh;
+  border: 1px solid var(--ess-border);
+  background-color: var(--ess-bg-navbar);
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+
+  h1 {
+    font-family: 'Barlow', sans-serif;
+    color: var(--ess-blue-800);
+    text-transform: uppercase;
+    padding-left: 1rem;
+  }
+
+  .navlinks {
+    display: flex;
+    justify-content: space-evenly;
+    list-style-type: none;
+    width: 50%;
+  }
+
+  .navlinks > li {
+    font-size: 1.2rem;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+
+  .navlinks > li > a {
+    color: var(--ess-text-900);
+    text-decoration: none;
+  }
+
+   .navlinks > li > a:hover {
+    text-decoration: underline;
+  }
+  
+  .person {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 1rem;
+  }
+
+}
