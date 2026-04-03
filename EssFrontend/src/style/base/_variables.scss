@@ -11,21 +11,24 @@
   --ess-text-600: #6f7a89;
   --ess-text-100: #FFFFFF;
 
-  --ess-success: #59A869;
-  --ess-warning: #ce9f39;
-  --ess-danger: #D35C58;
-
   --ess-bg-page: #f3f5f8;
   --ess-bg-navbar: #e6e8ebb3;
   --ess-bg-code: #2B3341;
 
   --ess-border: #D9E0E9;
   --ess-shadow-card: 0 4px 14px rgba(30, 41, 59, 0.8);
+  
+  --ess-success: #59A869;
+  --ess-warning: #ce9f39;
+  --ess-danger: #D35C58;
 
   --ess-radius-sm: 6px;
   --ess-radius-md: 8px;
   
-  --ess-font-ui: "Barlow Condensed", Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  --ess-font-title: "Times New Roman";
+  --ess-font-ui: "Wix Madefor Display", "Barlow Condensed", "Roboto", sans-serif;
+  
+
   
   --ess-transition: 160ms ease;
 }

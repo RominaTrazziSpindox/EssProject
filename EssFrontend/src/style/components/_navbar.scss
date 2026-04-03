@@ -8,10 +8,10 @@
   width: 100%;
 
   h1 {
-    font-family: 'Barlow', sans-serif;
+    font-family: var(--ess-font-title);
     color: var(--ess-blue-800);
     text-transform: uppercase;
-    padding-left: 1rem;
+    padding-left: 1.2rem;
   }
 
   .navlinks {
@@ -19,10 +19,11 @@
     justify-content: space-evenly;
     list-style-type: none;
     width: 50%;
+    font-family: var(--ess-font-ui);
   }
 
   .navlinks > li {
-    font-size: 1.2rem;
+    font-size: 1rem;
     letter-spacing: 0.04em;
     cursor: pointer;
   }
@@ -42,6 +43,7 @@
     align-items: center;
     gap: 0.5rem;
     padding-right: 1rem;
+    font-family: var(--ess-font-ui);
 
     i {
       color: var(--ess-text-900);

@@ -39,7 +39,7 @@
   .brand {
 
     .institution_name {
-      font-family: var(--ess-font-ui);
+      font-family: var(--ess-font-title);
       text-shadow: var(--ess-shadow-card);
       text-transform: uppercase;
       letter-spacing: 0.08em;
@@ -49,22 +49,24 @@
     }
   
     .institution_division {
+      font-family: var(--ess-font-ui);
       text-align: center;
-      font-size: 2rem;
+      font-size: 1.5rem;
     }
 
   }
 
   .control_panel {
     text-align: center;
+    font-family: var(--ess-font-ui);
 
     :first-child {
       font-weight: bolder;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
     }
 
     & a.icon_text {
-      font-size: 1.3rem;
+      font-size: 1.1rem;
     }
   }
 
@@ -73,15 +75,17 @@
     margin-bottom: 1.5rem;
 
     a > button {
+      
       background-color: #e7e7e7; 
    
     }
 
     button {
+      font-family: var(--ess-font-ui);
       color: var(--ess-text-900);
       
       .icon_text {
-        font-size: 1.2rem;
+        font-size: 0.9rem;
         color: var(--ess-text-900);
         text-align: center;
         padding: 1rem 2rem;
