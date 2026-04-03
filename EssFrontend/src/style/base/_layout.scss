@@ -21,22 +21,22 @@ header {
 }
 
 main {
-  display: flex;
-  gap: 1.5rem;
+  display: grid;
+  grid-template-columns: 50% 45%;
+  gap: 5%;
   padding: 1.5rem;
-  background: #f3f5f8;
+  background: var(--ess-bg-page);
   min-width: 0;
 }
 
-main > :first-child {
-  flex: 2;
-}
 
-main > :last-child {
-  flex: 1;
-}
 
 footer {
-  padding: 1rem 1.5rem;
-  background: #f3f5f8;
+  height: 50px;
+  background: var(--ess-bg-navbar);
+  border: 1px solid var(--ess-border);
+  position: fixed;
+  left: 20vw;
+  bottom: 0;
+  width: 100%;
 }
