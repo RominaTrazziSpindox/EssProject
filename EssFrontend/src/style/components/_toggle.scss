@@ -1,0 +1,34 @@
+label:has([role="switch"]) {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25em;
+}
+
+[role="switch"] {
+	--height: 1.19em;
+	--width: 0.8;
+
+	appearance: none;
+	display: inline-block;
+	background-color: var(--ess-blue-600);
+	height: var(--height);
+	width: calc(var(--height) * calc(1 + var(--width)));
+	border: 0;
+	border-radius: 99em;
+}
+
+
+[role="switch"]::after {
+	content: "";
+	display: block;
+	aspect-ratio: 1;
+	background-color: var(--ess-text-100);
+	border: max(2px, 0.125em) solid var(--ess-border);
+	height: 100%;
+	border-radius: 50%;
+}
+
+[role="switch"]:checked::after {
+	border-color: var(--ess-blue-600);
+	translate: calc(var(--height) * var(--width)) 0;
+}
