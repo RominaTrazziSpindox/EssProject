@@ -45,56 +45,72 @@ function FormCampaign() {
 
                 <fieldset className="new_attendee">
 
-                    <div className="field">
-                    
-                        <label htmlFor="first_name">First name</label>
-                        <input type="text" id="first_name" placeholder="Es. Mario"></input>
+                    <div className="fields_column">
                         
-                        <label htmlFor="partner_id">Partner Id</label>
-                        <input type="text" id="partner_id" placeholder="Es. Maria Rossi"></input>
+                        <div className="fields">
+                            <label htmlFor="first_name">First name</label>
+                            <input id="first_name" type="text" placeholder="Es. Mario" />
+                        </div>
+
+                        <div className="fields">
+                            <label htmlFor="partner_id">Partner Id</label>
+                            <input id="partner_id" type="text" placeholder="Es. Maria Rossi" />
+                        </div>
                         
-                        <label htmlFor="cn_code">CN Code</label>
-                        <input type="text" id="cn_code" placeholder="Es. 1234"></input>
+                        <div className="fields">
+                            <label htmlFor="cn_code">CN Code</label>
+                            <input id="cn_code" type="text" placeholder="Es. 1234" />
+                        </div>
 
                     </div>
 
-                    <div className="field">
 
-                       <label htmlFor="last_name">Last name</label>
-                        <input type="text" id="last_name" placeholder="Es. Rossi"></input>
+                    <div className="fields_column">
 
-                        <Toggle />
-
-                        <label htmlFor="qr_code">Qr Code</label>
-                        <input type="text" id="qr_code" placeholder="Es. xxxxxx"></input>
-
-                    </div>
-
-                    <div className="fields">
-
-                        <label htmlFor="birth_date">Birth date</label>
-                        <input type="date" id="birth_date"></input>
-                      
-                    </div>
-
-                    <div className="fields">
-
-                       <Button text="+ Add Attendee" variant="primary" onClick={addAttendee} />
-                       <Button text="Change Attendee" variant="secondary" onClick={changeAttendee} />
-                       <Button text="Delete Attendee" variant="danger" onClick={deleteAttendee} />
+                        <div className="fields">
+                            <label htmlFor="last_name">Last name</label>
+                            <input id="last_name" type="text" placeholder="Es. Rossi" />
+                        </div> 
+                        
+                        <div className="fields">
+                            <label htmlFor="is_companion">IsCompanion</label>
+                            <input id="is_companion" role="switch" type="checkbox" />
+                        </div> 
+                        
+                        <div className="fields">
+                            <label htmlFor="qr_code">Qr Code</label>
+                            <input id="qr_code" type="text" placeholder="Es. xxxxxx" />
+                        </div>
 
                     </div>
 
+
+                    <div className="fields_column">
+                        
+                        <div className="fields">
+                            <label htmlFor="birth_date">Birth date</label>
+                            <input id="birth_date" type="date" />
+                        </div>
+
+                    </div>
+
+                
+                    <Button text="+ Add Attendee" variant="primary" onClick={addAttendee} />  
+                    <Button text="Change Attendee" variant="secondary" onClick={changeAttendee} />
+                    <Button text="Delete Attendee" variant="danger" onClick={deleteAttendee} />
+                
+            
                 </fieldset>
-
-                <hr></hr> 
-
+             
                 <div className="fields_result">
 
                     <Button text="Submit Campaign" variant="primary" onClick={submitCampaign} />
                     <Button text="Clear Form" variant="danger" onClick={clearForm} />
                 
                 </div>
+                
+
+                <hr></hr> 
 
             </form>
             

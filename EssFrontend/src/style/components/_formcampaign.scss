@@ -7,12 +7,12 @@ hr {
     color: var(--ess-border);
 }
 
-
 form {
     background-color: var(--ess-text-100);
     padding: 1rem 1rem 5rem;
     border: 1px solid var(--ess-border);
     border-radius: 0.3rem;
+    max-width: 30vw;
 
     .new_campaign {
         display: flex;
@@ -22,33 +22,42 @@ form {
 
     .new_attendee {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(8vw, 1fr));
-        gap: 1rem 1rem; /* row-gap column-gap */
+        grid-template-columns: repeat(3, minmax(200px, auto));
+        grid-template-rows: auto auto;
+        gap: 1.5rem 2rem;
         border-radius: 0.3rem;
-
-        
     }
 
-    label {
-        font-family: var(--ess-font-ui);
-        font-size: 1rem;
-        font-weight: bolder;
-        color: var(--ess-blue-800);
-        margin-bottom: 0.5rem;  
-    } 
+    .fields {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
     input {
-        border: 1px solid var(--ess-border);
-        border-radius: 0.3rem;
-        margin-bottom: 0.8rem;
+       border: 1px solid var(--ess-border); 
+       border-radius: 0.3rem;
+        margin-bottom: 1rem;
+        width: 100%;
 
-        &::placeholder {
+        &::placeholder { 
             font-family: var(--ess-font-ui);
-            font-size: 0.8rem;
+            font-size: 0.8rem; 
         }
     }
 
-    .new_attendee label, .new_attendee input, .new_campaign label {
-        margin-top: 0.8rem;
+    label { 
+        font-family: var(--ess-font-ui); 
+        font-size: 1rem; 
+        font-weight: bolder; 
+        color: var(--ess-blue-800); 
+        margin-bottom: 0.5rem; 
+    } 
+
+    .new_attendee > button {
+        justify-self: center;
+        width: 70%;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
     }
 }

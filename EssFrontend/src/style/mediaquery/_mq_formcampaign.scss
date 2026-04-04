@@ -1,0 +1,55 @@
+@media (max-width: 2399px) {
+  form .new_attendee {
+    grid-template-columns: 1fr 1fr;
+    
+    grid-template-areas:
+      "col1 col2"
+      "birth ."
+      "add change"
+      "delete .";
+  }
+
+  form .new_attendee > .fields_column:nth-of-type(1) {
+    grid-area: col1;
+  }
+
+  form .new_attendee > .fields_column:nth-of-type(2) {
+    grid-area: col2;
+  }
+
+  form .new_attendee > .fields_column:nth-of-type(3) {
+    grid-area: birth;
+  }
+
+  form .new_attendee > button:nth-of-type(1) {
+    grid-area: add;
+  }
+
+  form .new_attendee > button:nth-of-type(2) {
+    grid-area: change;
+  }
+
+  form .new_attendee > button:nth-of-type(3) {
+    grid-area: delete;
+  }
+}
+
+
+@media (max-width: 1300px) {
+    .new_attendee {
+        grid-template-columns: 1fr;
+        
+        grid-template-areas:
+        "col1"
+        "col2"
+        "birth"
+        "add"
+        "change"
+        "delete";
+    }
+
+    .new_attendee > button {
+        width: 100%;
+        max-width: none;
+    }
+}
