@@ -72,10 +72,7 @@ function FormCampaign() {
                             <input id="last_name" type="text" placeholder="Es. Rossi" />
                         </div> 
                         
-                        <div className="fields">
-                            <label htmlFor="is_companion">IsCompanion</label>
-                            <input id="is_companion" role="switch" type="checkbox" />
-                        </div> 
+                        <Toggle />
                         
                         <div className="fields">
                             <label htmlFor="qr_code">Qr Code</label>
@@ -94,15 +91,16 @@ function FormCampaign() {
 
                     </div>
 
-                
+                    
                     <Button text="+ Add Attendee" variant="primary" onClick={addAttendee} />  
-                    <Button text="Change Attendee" variant="secondary" onClick={changeAttendee} />
                     <Button text="Delete Attendee" variant="danger" onClick={deleteAttendee} />
                 
             
                 </fieldset>
+                
+                <hr></hr> 
              
-                <div className="fields_result">
+                <div className="action">
 
                     <Button text="Submit Campaign" variant="primary" onClick={submitCampaign} />
                     <Button text="Clear Form" variant="danger" onClick={clearForm} />
@@ -110,7 +108,7 @@ function FormCampaign() {
                 </div>
                 
 
-                <hr></hr> 
+                
 
             </form>
             

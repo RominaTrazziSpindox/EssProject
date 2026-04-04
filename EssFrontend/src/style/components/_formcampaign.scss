@@ -26,6 +26,7 @@ form {
         grid-template-rows: auto auto;
         gap: 1.5rem 2rem;
         border-radius: 0.3rem;
+        margin-bottom: 2rem;
     }
 
     .fields {
@@ -56,8 +57,16 @@ form {
 
     .new_attendee > button {
         justify-self: center;
-        width: 70%;
+        width: 60%;
         margin-top: 1rem;
         margin-bottom: 1rem;
+    }
+
+    .action {
+        display: flex;
+        justify-content: space-evenly;
+        margin-top: 3rem;
+        margin-bottom: 1rem;
+
     }
 }
