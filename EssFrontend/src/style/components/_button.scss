@@ -1,0 +1,28 @@
+button {
+    padding: 0.6rem 0.5rem;
+    border-radius: 0.3rem;
+    border: 1px solid transparent;
+    font-family: var(--ess-font-ui);
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.button--primary {
+  background-color: var(--ess-blue-600);
+  color: var(--ess-text-100);
+  border-color: var(--ess-blue-600);
+}
+
+.button--secondary {
+  background-color: var(--ess-bg-button);
+  color: var(--ess-text-900);
+  border-color: var(--ess-bg-button);
+}
+
+.button--danger {
+  background-color: var(--ess-danger);
+  color: var(--ess-text-100);
+  border-color: var(--ess-danger);
+}
+
+

@@ -3,12 +3,14 @@ import Navbar from './components/Navbar.jsx'
 import FormCampaign from './components/FormCampaign.jsx'
 import PayloadPreview from './components/PayloadPreview.jsx'
 function App() {
-    return (
+    
+  return (
        
     <div className="page">
       <BlueColumn />
 
       <div className="content">
+        
         <header>
             <Navbar />
         </header>
@@ -22,8 +24,9 @@ function App() {
         <footer>Footer</footer>
 
       </div>
+      
     </div>
-    )
+  )
 }
 
 
