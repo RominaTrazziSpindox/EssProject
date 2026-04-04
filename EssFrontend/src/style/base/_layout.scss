@@ -4,14 +4,9 @@
   min-height: 100vh;
 }
 
-.blue-column {
-  grid-column: 1;
-}
-
 .content {
-  grid-column: 2;
   display: grid;
-  grid-template-rows: 10vh auto auto;
+  grid-template-rows: 100px auto 50px;
   min-height: 100vh;
 }
 
@@ -24,6 +19,7 @@ body {
 header {
   display: flex;
   align-items: center;
+  border: 1px solid var(--ess-border);
 }
 
 main {
@@ -32,7 +28,6 @@ main {
   gap: 5%;
   padding: 1.5rem;
   background: var(--ess-bg-page);
-  min-width: 0;
 }
 
 footer {
