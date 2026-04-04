@@ -15,6 +15,12 @@
   min-height: 100vh;
 }
 
+body {
+  color: var(--ess-text-900);
+  background: var(--ess-bg-page);
+  line-height: 1.45;
+}
+
 header {
   display: flex;
   align-items: center;
@@ -28,8 +34,6 @@ main {
   background: var(--ess-bg-page);
   min-width: 0;
 }
-
-
 
 footer {
   height: 50px;
