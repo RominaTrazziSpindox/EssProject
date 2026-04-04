@@ -76,12 +76,11 @@
 
     a > button {
       
-      background-color: #e7e7e7; 
+      background-color: var(--ess-bg-page); 
    
     }
 
     button {
-      font-family: var(--ess-font-ui);
       color: var(--ess-text-900);
       
       .icon_text {
