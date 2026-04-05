@@ -1,0 +1,21 @@
+.json-box {
+  background-color: #111;
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  font-family: monospace;
+  white-space: pre-wrap;
+  overflow-x: auto;
+}
+
+.json-key {
+  color: var(--ess-success);
+}
+
+.json-value {
+  color: var(--ess-text-100);
+}
+
+.json-punctuation {
+  color: var(--ess-blue-600);
+}
