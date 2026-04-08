@@ -1,0 +1,23 @@
+.rate_limit {
+    background-color: var(--ess-text-100);
+    font-family: var(--ess-font-ui);
+    border: 1px solid var(--ess-border);
+    border-radius: 0.3rem;
+    font-size: 1rem; 
+    padding: 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+#request_number {
+    font-size: 1rem; 
+    font-weight: bolder; 
+    color: var(--ess-blue-800); 
+    margin-bottom: 0.5rem; 
+}
+
+#request_number > span {
+    font-weight: lighter;
+    color: var(--ess-text-900);
+}
+
+

@@ -1,24 +1,30 @@
 import JsonText from './JsonText'; 
+import RateLimit from './RateLimit.jsx'
 
 function PayloadPreview() {
 
   return (
-    <section className="panel">
+   <div>
+      <section>
 
-      <div className="json_payload">
+        <div className="json_payload">
+        
+          <h2>Payload preview</h2>
+          <hr></hr>        
+          <h3>Review payload data</h3> 
+
+
+          <div className="json_code">
+            <JsonText/>
+          </div> 
+        
+        </div>
+        
+      </section>
       
-        <h2>Payload preview</h2>
-        <hr></hr>        
-        <h3>Review payload data</h3> 
-
-
-        <div className="json_code">
-          <JsonText/>
-        </div> 
+      <RateLimit />
+    </div>  
       
-      </div>
-  
-    </section>
   )
 }
 
