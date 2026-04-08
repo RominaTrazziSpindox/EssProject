@@ -12,7 +12,7 @@ form {
     padding: 1rem 1rem 5rem;
     border: 1px solid var(--ess-border);
     border-radius: 0.3rem;
-    max-width: 30vw;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 
     .new_campaign {
         display: flex;
@@ -33,6 +33,10 @@ form {
         display: flex;
         flex-direction: column;
         align-items: center;
+    }
+
+    .fields_column:nth-child(2) > div:nth-child(2) { //IsCompanion
+        margin-bottom: 5px;
     }
 
     input {
@@ -66,7 +70,6 @@ form {
         display: flex;
         justify-content: space-evenly;
         margin-top: 3rem;
-        margin-bottom: 1rem;
-
+        margin-bottom: 1rem;    
     }
 }

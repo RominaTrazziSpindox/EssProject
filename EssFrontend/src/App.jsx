@@ -2,6 +2,7 @@ import BlueColumn from './components/BlueColumn.jsx'
 import Navbar from './components/Navbar.jsx'
 import FormCampaign from './components/FormCampaign.jsx'
 import PayloadPreview from './components/PayloadPreview.jsx'
+
 function App() {
     
   return (
@@ -19,6 +20,7 @@ function App() {
         <main>
           <FormCampaign />
           <PayloadPreview />
+
         </main>
 
         <footer>Footer</footer>
