@@ -36,20 +36,15 @@
 
 
 @media (max-width: 1300px) {
-    .new_attendee {
-        grid-template-columns: 1fr;
-        
-        grid-template-areas:
-        "col1"
-        "col2"
-        "birth"
-        "add"
-        "change"
-        "delete";
-    }
-
-    .new_attendee > button {
-        width: 100%;
-        max-width: none;
-    }
+  .new_attendee {
+      grid-template-columns: 1fr;
+      
+      grid-template-areas:
+      "col1"
+      "col2"
+      "birth"
+      "add"
+      "change"
+      "delete";
+  }
 }

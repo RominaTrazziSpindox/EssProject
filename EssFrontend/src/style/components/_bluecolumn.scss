@@ -1,0 +1,98 @@
+.blue-column {
+  background: #00255D;
+  background: linear-gradient(90deg,rgba(0, 37, 93, 1) 0%, rgba(0, 48, 135, 1) 33%, rgba(31, 75, 159, 1) 67%, rgba(31, 100, 184, 1) 85%, rgba(47, 123, 200, 1) 100%);
+  color: var(--ess-text-100);
+  padding: 0.2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items:center;
+  gap: 2rem;
+
+  hr {
+    width: 100%;
+    color: var(--ess-border);
+  }
+
+  // LINK PROPERTIES
+
+  a {
+    padding-left: 1rem;
+    font-size: 1.2rem;
+    text-decoration: none;
+  }
+
+  a:link, a:visited {
+    color: var(--ess-text-100);
+  }
+
+  a:hover {
+    color: var(--ess-blue-500);
+    text-decoration: underline;
+  }
+
+  a:link:active, a:visited:active {
+    color: var(--ess-blue-600);
+  }
+
+  .brand {
+
+    .institution_name {
+      font-family: var(--ess-font-title);
+      text-shadow: var(--ess-shadow-card);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 0;
+    }
+  
+    .institution_division {
+      font-family: var(--ess-font-ui);
+      text-align: center;
+      font-size: 1.5rem;
+    }
+
+  }
+
+  .control_panel {
+    text-align: center;
+    font-family: var(--ess-font-ui);
+
+    :first-child {
+      font-weight: bolder;
+      font-size: 1.5rem;
+    }
+
+    & a.icon_text {
+      font-size: 1.1rem;
+    }
+  }
+
+  .logout {
+    margin-top: auto;
+    margin-bottom: 1.5rem;
+
+    a > button {
+      
+      background-color: var(--ess-bg-page); 
+   
+    }
+
+    button {
+      color: var(--ess-text-900);
+      
+      .icon_text {
+        font-size: 0.9rem;
+        color: var(--ess-text-900);
+        text-align: center;
+        padding: 1rem 2rem;
+      }
+
+      i {
+        color: var(--ess-text-900);
+        padding-left: 10px;
+        
+      }
+    }
+  }
+}
