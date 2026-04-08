@@ -1,16 +1,17 @@
-function Toggle() {
-
+function Toggle({ id, checked, onChange, disabled }) {
     return (
-
-        <div className="fields">
-            <label htmlFor="is_companion">IsCompanion</label>
-            <input id="is_companion" role="switch" type="checkbox" />
-        </div>
-
-  
-
-
-    )
+        <>
+            <label htmlFor={id}>Is companion</label>
+            <input
+                id={id}
+                role="switch"
+                type="checkbox"
+                checked={checked}
+                onChange={onChange}
+                disabled={disabled}
+            />
+        </>
+    );
 }
 
-export default Toggle
+export default Toggle;
