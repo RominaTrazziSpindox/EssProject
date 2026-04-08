@@ -6,7 +6,7 @@
 
 .content {
   display: grid;
-  grid-template-rows: 100px auto 50px;
+  grid-template-rows: 100px 1fr 50px;
   min-height: 100vh;
 }
 
@@ -25,15 +25,15 @@ header {
 
 main {
   display: grid;
-  grid-template-columns: 50% 45%;
+  grid-template-columns: 1.3fr 1fr;
   gap: 5%;
   padding: 1.5rem;
   background: var(--ess-bg-page);
 }
 
-main > :nth-child(2)  {
+main > :nth-child(2)  {  
   display: grid;
-  grid-template-rows: auto auto;
+  grid-template-rows: minmax(0, 1fr) auto ;
   gap: 1rem;
 }
 
