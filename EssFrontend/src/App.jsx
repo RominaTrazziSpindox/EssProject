@@ -1,7 +1,7 @@
 import BlueColumn from './components/BlueColumn.jsx'
 import Navbar from './components/Navbar.jsx'
-import FormCampaign from './components/FormCampaign.jsx'
-import PayloadPreview from './components/PayloadPreview.jsx'
+import CampaignPage from './components/CampaignPage.jsx'
+
 
 function App() {
     
@@ -15,12 +15,9 @@ function App() {
         <header>
             <Navbar />
         </header>
-        
 
         <main>
-          <FormCampaign />
-          <PayloadPreview />
-
+          <CampaignPage />
         </main>
 
         <footer>Footer</footer>

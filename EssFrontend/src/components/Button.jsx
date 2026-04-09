@@ -1,8 +1,8 @@
-function Button({text, handleClick, variant = 'primary', type="button"}) {
+function Button({text, onClick, variant = 'primary', type="button"}) {
 
     return (
 
-    <button className={`button button--${variant}`} onClick={handleClick} type={type}>
+    <button className={`button button--${variant}`} onClick={onClick} type={type}>
       {text}
     </button>
 

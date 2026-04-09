@@ -1,6 +1,5 @@
 function Navbar() {
 
-
   return (
     <div className="navbar_container">
 
