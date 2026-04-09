@@ -14,6 +14,12 @@ form {
     border-radius: 0.3rem;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 
+    fieldset {
+        border: 0;
+        padding: 0;
+        margin: 0;
+    }
+
     .new_campaign {
         display: flex;
         flex-direction: column;
@@ -21,12 +27,24 @@ form {
     }
 
     .new_attendee {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(200px, auto));
-        grid-template-rows: auto auto;
-        gap: 1.5rem 2rem;
-        border-radius: 0.3rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
         margin-bottom: 2rem;
+    }
+
+    .attendee_row {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(200px, 1fr));
+        gap: 1.5rem 2rem;
+        align-items: start;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--ess-border);
+    }
+
+    .fields_column {
+        display: flex;
+        flex-direction: column;
     }
 
     .fields {
@@ -35,41 +53,53 @@ form {
         align-items: center;
     }
 
-    .fields_column:nth-child(2) > div:nth-child(2) { //IsCompanion
+    #is_companion {
         margin-bottom: 5px;
     }
 
     input {
-       border: 1px solid var(--ess-border); 
-       border-radius: 0.3rem;
+        border: 1px solid var(--ess-border);
+        border-radius: 0.3rem;
         margin-bottom: 1rem;
         width: 100%;
 
-        &::placeholder { 
+        &::placeholder {
             font-family: var(--ess-font-ui);
-            font-size: 0.8rem; 
+            font-size: 0.8rem;
         }
     }
 
-    label { 
-        font-family: var(--ess-font-ui); 
-        font-size: 1rem; 
-        font-weight: bolder; 
-        color: var(--ess-blue-800); 
-        margin-bottom: 0.5rem; 
-    } 
+    label {
+        font-family: var(--ess-font-ui);
+        font-size: 1rem;
+        font-weight: bolder;
+        color: var(--ess-blue-800);
+        margin-bottom: 0.5rem;
+    }
 
-    .new_attendee > button {
-        justify-self: center;
-        width: 60%;
+    .attendee_actions {
+        display: flex;
+        justify-content: center;
         margin-top: 1rem;
-        margin-bottom: 1rem;
+    }
+
+    .add_attendee {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+
+    .form-feedback {
+        margin: 1rem 0;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--ess-border);
+        border-radius: 0.3rem;
     }
 
     .action {
         display: flex;
         justify-content: space-evenly;
         margin-top: 3rem;
-        margin-bottom: 1rem;    
+        margin-bottom: 1rem;
     }
 }
