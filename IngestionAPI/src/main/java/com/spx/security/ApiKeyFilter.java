@@ -1,19 +1,22 @@
 package com.spx.security;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import org.jspecify.annotations.NonNull;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import com.spx.dto.ApiErrorDTO;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.jspecify.annotations.NonNull;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 /* This filter goes into the Servlet Filter Chain handled by Tomcat:
 
@@ -39,7 +42,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     // The filter is only for this endpoint "/api/v1/crm/sync"
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getRequestURI().startsWith("/api/v1/crm");
+        return !request.getRequestURI().startsWith("/api/v1/crm") || HttpMethod.OPTIONS.matches(request.getMethod());
     }
 
     @Override
