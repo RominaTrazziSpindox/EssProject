@@ -26,7 +26,7 @@ export async function syncCampaigns(campaignPayload) {
                 'Content-Type': 'application/json',
                 'X-API-KEY': API_KEY,
             },
-            body: JSON.stringify([campaignPayload]),
+            body: JSON.stringify(campaignPayload),
             signal: AbortSignal.timeout(TIMEOUT_MS),
         });
 
@@ -57,7 +57,6 @@ export async function syncCampaigns(campaignPayload) {
     httpError.code = getErrorCode(response.status);
     throw httpError;
 }
-
 
 // Common status HTTP errors
 function getErrorCode(status) {
