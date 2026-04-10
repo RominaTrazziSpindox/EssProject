@@ -1,4 +1,4 @@
-function Button({text, onClick, variant = 'primary', type="button"}) {
+function Button({text, onClick, variant = 'primary', type="button", disabled = false}) {
 
     return (
 

@@ -15,7 +15,7 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
   const [selectedRowId, setSelectedRowId] = useState(null);
 
   /* Tracks whether the form submission is currently in progress
-   While true, form controls are disabled to prevent duplicate actions */
+  While true, form controls are disabled to prevent duplicate actions */
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Stores client-side validation errors
@@ -78,6 +78,7 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
 
   // Appends a new empty attendee to the current form
   const addAttendee = () => {
+
     const newAttendee = createEmptyAttendee();
 
     setFormData((current) => ({
@@ -88,8 +89,8 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
 
   /* Removes the selected attendee.
   If it is the last remaining attendee, the row is reset instead of removing the array entirely. */
-  const removeAttendee = () => {
-    if (!selectedRowId) return;
+  const removeAttendee = (rowIdToRemove) => {
+    if (!rowIdToRemove) return;
 
     setFormData((current) => {
       if (current.attendees.length === 1) {
@@ -102,15 +103,14 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
       return {
         ...current,
         attendees: current.attendees.filter(
-          (attendee) => attendee.rowId !== selectedRowId
+          (attendee) => attendee.rowId !== rowIdToRemove
         ),
       };
     });
 
-    // Remove validation errors associated with the deleted attendee.
     setValidationErrors((prev) => {
       const updatedAttendeeErrors = { ...prev.attendees };
-      delete updatedAttendeeErrors[selectedRowId];
+      delete updatedAttendeeErrors[rowIdToRemove];
 
       return {
         ...prev,
@@ -118,10 +118,8 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
       };
     });
 
-    setSelectedRowId(null);
+    setSelectedRowId('');
   };
-
-
 
   /* FORM ACTIONS */
 
@@ -238,20 +236,42 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
 
         <fieldset className="new_attendee">
           
-          {formData.attendees.map((attendee) => (
-            <div key={attendee.rowId} className={`attendee-wrapper ${selectedRowId === attendee.rowId ? 'selected' : ''}`}
+          {formData.attendees.map((attendee, index) => (
+
+            <div key={attendee.rowId} className={`attendee_wrapper ${selectedRowId === attendee.rowId ? 'selected' : ''}`}
             onClick={() => setSelectedRowId(attendee.rowId)}>  
-                <AttendeeContent attendee={attendee} onFieldChange={handleChangeAttendee} isSubmitting={isSubmitting}
-                errors={validationErrors.attendees[attendee.rowId]}/>
+
+              <p>Attendee #{index + 1}</p>
+
+              <AttendeeContent attendee={attendee} onFieldChange={handleChangeAttendee} isSubmitting={isSubmitting}
+              errors={validationErrors.attendees[attendee.rowId]}/>
+            
             </div>
           ))}
+
         </fieldset>
 
         <div className="action">
           <Button text="Add Attendee" variant="primary" onClick={addAttendee} disabled={isSubmitting}/>
+          
+          <div className="remove_attendee_group">  
+            
+            <label htmlFor="attendeeToRemove">Choose attendee to remove</label>
+            
+            <select id="attendeeToRemove" value={selectedRowId} onChange={(e) => setSelectedRowId(e.target.value)}disabled={isSubmitting}>
+              <option value="">Select an attendee</option>
 
-          <Button text="Remove Attendee" variant="danger" onClick={removeAttendee} disabled={isSubmitting || !selectedRowId}/>
-         
+              {formData.attendees.map((attendee, index) => (
+                <option key={attendee.rowId} value={attendee.rowId}>
+                  Attendee #{index + 1} - {attendee.firstName || 'No name'} {attendee.lastName || ''}
+                </option>
+              ))}
+            </select>
+
+            <Button text="Remove Attendee" variant="danger" onClick={() => removeAttendee(selectedRowId)} disabled={isSubmitting || !selectedRowId}/>
+          
+          </div>   
+            
         </div>
 
         <hr />
@@ -264,12 +284,13 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
 
         <div className="action">
           <Button type="submit" variant="primary" text={isSubmitting ? 'Sending...' : 'Submit Campaign'} disabled={isSubmitting}/>
-           
           <Button text="Clear Form" variant="danger" onClick={clearForm} disabled={isSubmitting}/>
         </div>
+
       </form>
     </section>
   );
 }
+
 
 export default FormCampaign;
