@@ -2,33 +2,48 @@ label:has([role="switch"]) {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	margin-bottom: 0.3rem;
+	gap: 0.4rem;
+	cursor: pointer;
 }
 
 [role="switch"] {
-	--height: 1.19em;
-	--width: 0.8;
+	--switch-width: 3.4rem;
+	--switch-height: 1.9rem;
+	--thumb-size: 1.45rem;
+	--padding: 0.18rem;
 
 	appearance: none;
+	-webkit-appearance: none;
+	position: relative;
 	display: inline-block;
-	background-color: var(--ess-blue-600);
-	height: var(--height);
-	width: calc(var(--height) * calc(1 + var(--width)));
-	border: 0;
+	width: var(--switch-width);
+	height: var(--switch-height);
 	border-radius: 99em;
+	background-color: var(--ess-border);
+	cursor: pointer;
+	transition: background-color 0.25s ease;
 }
 
 [role="switch"]::after {
 	content: "";
-	display: block;
-	aspect-ratio: 1;
-	background-color: var(--ess-text-100);
-	border: max(2px, 0.125em) solid var(--ess-border);
-	height: 100%;
+	position: absolute;
+	top: 50%;
+	left: var(--padding);
+	width: var(--thumb-size);
+	height: var(--thumb-size);
 	border-radius: 50%;
+	background-color: var(--ess-text-100);
+	transform: translateY(-50%);
+	transition: transform 0.25s ease;
+}
+
+[role="switch"]:checked {
+	background-color: var(--ess-blue-600);
 }
 
 [role="switch"]:checked::after {
-	border-color: var(--ess-blue-600);
-	translate: calc(var(--height) * var(--width)) 0;
+	transform: translateY(-50%) translateX(
+		calc(var(--switch-width) - var(--thumb-size) - (var(--padding) * 2))
+	);
 }
+

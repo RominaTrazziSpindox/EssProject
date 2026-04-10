@@ -150,6 +150,7 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
     // If validation fails, show errors and prevent submission
     if (!validation.isValid) {
       setValidationErrors(validation.errors);
+      
       setFeedback({
         type: 'error',
         message: 'Validation failed. Please check the fields.',
@@ -174,7 +175,7 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
       // Build the final payload expected by the backend
       const campaignPayload = buildCampaignPayload(formData);
 
-      // The API expects an array of campaigns
+      // API expects an array of campaigns
       await syncCampaigns([campaignPayload]);
 
       setFeedback({
@@ -274,10 +275,10 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
             
         </div>
 
-        <hr />
+        <hr id ="hr_end"/>
 
         {feedback.message && (
-          <div className={`form-feedback ${feedback.type}`}>
+          <div className={`form_user_feedback ${feedback.type}`}>
             {feedback.message}
           </div>
         )}
@@ -291,6 +292,5 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
     </section>
   );
 }
-
 
 export default FormCampaign;

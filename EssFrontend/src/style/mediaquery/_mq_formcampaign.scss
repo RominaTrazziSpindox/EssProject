@@ -1,9 +1,13 @@
+// Two rows
+
 @media (max-width: 1999px) {
-  form .attendee_row {
+
+ form .attendee_row {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
       "col1 col2"
       "birth .";
+    align-items: stretch;
   }
 
   form .attendee_row > .fields_column:nth-of-type(1) {
@@ -17,12 +21,9 @@
   form .attendee_row > .fields_column:nth-of-type(3) {
     grid-area: birth;
   }
-
-  #is_companion {
-    margin-bottom: 20px;
-  }
 }
 
+// One row
 @media (max-width: 1300px) {
   form .attendee_row {
     grid-template-columns: 1fr;
@@ -55,3 +56,23 @@
   }
 }
 
+// Remove attendee group
+@media (max-width: 900px) {
+    
+  .action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .remove_attendee_groups {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "label"
+      "select"
+      "button";
+  }
+
+  .remove_attendee_groups button {
+      width: 100%;
+  }
+}

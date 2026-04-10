@@ -10,7 +10,7 @@ function AttendeeContent({ attendee, onFieldChange, isSubmitting, errors }) {
 
     return (
         
-        <div className="attendee_row">
+        <div className="new_attendee_row">
 
             <div className="fields_column">
                 <div className="fields">
