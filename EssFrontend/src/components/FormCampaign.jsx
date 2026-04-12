@@ -208,7 +208,7 @@ function FormCampaign({formData, setFormData, createInitialForm, createEmptyAtte
         case 'NETWORK_ERROR':
           setFeedback({
             type: 'error',
-            message: 'Network error or timeout.',
+            message: 'Network error or timeout (500).',
           });
           break;
 
