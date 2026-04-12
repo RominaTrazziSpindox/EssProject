@@ -21,10 +21,10 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
-    healthcheck:
 
+    healthcheck:
       # Use `gosu` to run the RabbitMQ health check as the `rabbitmq` user.
-      # Without it, Docker runs the health check command as `root`, and the check fails.
+      # Without it, Docker runs the health check command as `root`.
       test: ["CMD", "gosu", "rabbitmq", "rabbitmq-diagnostics", "-q", "ping"]
       interval: 5s
       timeout: 5s
