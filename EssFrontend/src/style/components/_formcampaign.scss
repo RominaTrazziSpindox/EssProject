@@ -28,12 +28,9 @@ form {
         border: 1px solid var(--ess-border);
         border-radius: 0.3rem; 
         padding: 0.5rem 1rem;
-
-        &::placeholder {
-            font-family: var(--ess-font-ui);
-            font-size: 0.8rem;
-            color: var(--ess-text-600);
-        }
+        font-family: var(--ess-font-ui);
+        font-size: 0.8rem;
+        color: var(--ess-text-600);
     }
 
     // Select common style
@@ -61,6 +58,14 @@ form {
         background-color: var(--ess-bg-page);
         color: var(--ess-text-600);
         cursor: not-allowed;
+    }
+
+    // Input error style
+    .input_error {
+        color: var(--ess-danger);
+        font-family: var(--ess-font-ui);
+        font-size: 0.6rem;
+        font-style: italic;
     }
 
     // New campaign 
