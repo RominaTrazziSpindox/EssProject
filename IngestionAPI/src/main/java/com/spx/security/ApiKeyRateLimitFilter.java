@@ -1,6 +1,5 @@
 package com.spx.security;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spx.config.RateLimitProperties;
 import com.spx.dto.ApiErrorDTO;
 import io.github.bucket4j.Bucket;
@@ -18,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * Applies rate limiting to the CRM sync endpoint.
