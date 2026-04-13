@@ -29,6 +29,9 @@ dependencies {
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
+    // --- Bucket4j ---
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.17.0")
+
     // --- Testing ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
