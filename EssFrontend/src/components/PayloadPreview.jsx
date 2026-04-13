@@ -1,7 +1,7 @@
 import JsonText from './JsonText'; 
 import RateLimit from './RateLimit.jsx';
 
-function PayloadPreview({ data }) {
+function PayloadPreview({ data, rateLimitInfo  }) {
   return (
     <div>
       <section>
@@ -16,7 +16,9 @@ function PayloadPreview({ data }) {
         </div>
       </section>
       
-      <RateLimit />
+      <RateLimit requestCount={rateLimitInfo.requestCount} limit={rateLimitInfo.limit} retryAfter={rateLimitInfo.retryAfter} 
+      isRateLimited={rateLimitInfo.isRateLimited} resetAt={rateLimitInfo.resetAt}/>
+
     </div>  
   );
 }

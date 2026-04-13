@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import {  useState, useMemo } from 'react';
 
 import FormCampaign from './FormCampaign.jsx';
 import PayloadPreview from './PayloadPreview.jsx';
@@ -6,6 +6,8 @@ import PayloadPreview from './PayloadPreview.jsx';
 import { toRequiredText, toNullable } from '../helpers/HelperFunctions';
 
 function CampaignPage() {
+
+  // Creates a new empty attendee 
   const createEmptyAttendee = () => ({
     rowId: crypto.randomUUID(),
     cn: '',
@@ -17,14 +19,28 @@ function CampaignPage() {
     qrCode: '',
   });
 
+  // Creates the initial form state with one empty attendee.
   const createInitialForm = () => ({
     campaignId: '',
     subCampaignId: '',
     attendees: [createEmptyAttendee()],
   });
 
+  // Main form state shared with FormCampaign.
   const [formData, setFormData] = useState(createInitialForm);
 
+  // Shared rate limit state used by both FormCampaign and RateLimit.
+  const [rateLimitInfo, setRateLimitInfo] = useState({
+    requestCount: 0,
+    limit: 5,
+    lastStatus: null,
+    retryAfter: null,
+    isRateLimited: false,
+    apiKeyStatus: 'Unknown',
+    resetAt: null,
+  });
+
+  // Builds the final payload expected by the backend.
   const buildCampaignPayload = (form) => ({
     campaignId: toRequiredText(form.campaignId),
     subCampaignId: toNullable(form.subCampaignId),
@@ -39,16 +55,18 @@ function CampaignPage() {
     })),
   });
 
+  // Memoizes the preview payload so it is recalculated only when formData changes.
   const previewPayload = useMemo(() => {
     return [buildCampaignPayload(formData)];
   }, [formData]);
 
   return (
     <>
-      <FormCampaign formData={formData} setFormData={setFormData} createInitialForm={createInitialForm} createEmptyAttendee={createEmptyAttendee} 
-      buildCampaignPayload={buildCampaignPayload}/>
-        
-      <PayloadPreview data={previewPayload} />
+      <FormCampaign formData={formData} setFormData={setFormData} createInitialForm={createInitialForm} createEmptyAttendee={createEmptyAttendee}
+      buildCampaignPayload={buildCampaignPayload} rateLimitInfo={rateLimitInfo} setRateLimitInfo={setRateLimitInfo}/>
+      
+      <PayloadPreview data={previewPayload} rateLimitInfo={rateLimitInfo}/>
+ 
     </>
   );
 }
