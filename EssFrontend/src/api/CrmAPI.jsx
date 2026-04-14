@@ -5,7 +5,7 @@ const API_URL = import.meta.env.VITE_CRM_SYNC_URL;
 const API_KEY = import.meta.env.VITE_CRM_API_KEY;
 
 // Timeout for API requests in milliseconds (default to 8000 ms if not set)
-const TIMEOUT_MS = parseInt(import.meta.env.VITE_CRM_TIMEOUT_MS, 10) || 8000;
+const TIMEOUT_MS = Number.parseInt(import.meta.env.VITE_CRM_TIMEOUT_MS, 10) || 8000;
 
 // Sends the campaign payload to the Producer API (= an array of campaigns)
 export async function syncCampaigns(campaignPayload) {

@@ -1,22 +1,29 @@
 package com.spx.security;
 
+import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
 import com.spx.config.RateLimitProperties;
 import com.spx.dto.ApiErrorDTO;
+
 import io.github.bucket4j.Bucket;
 import io.github.bucket4j.ConsumptionProbe;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -128,10 +135,19 @@ public class ApiKeyRateLimitFilter extends OncePerRequestFilter {
 
     // Creates a new bucket using the configured capacity and refill window.
     private Bucket newBucket() {
+        Instant firstRefillTime = ZonedDateTime.now(ZoneId.systemDefault())
+            .truncatedTo(ChronoUnit.MINUTES)
+            .plusMinutes(1)
+            .toInstant();
+
         return Bucket.builder()
                 .addLimit(limit -> limit
                         .capacity(rateLimitProperties.getCapacity())
-                        .refillIntervally( rateLimitProperties.getCapacity(), rateLimitProperties.getWindow()))
+                        .refillIntervallyAligned(
+                                rateLimitProperties.getCapacity(),
+                                rateLimitProperties.getWindow(),
+                                firstRefillTime
+                        ))
                 .build();
-        }
     }
+}
