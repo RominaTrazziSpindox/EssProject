@@ -20,7 +20,9 @@ function App() {
           <CampaignPage />
         </main>
 
-        <footer>Footer</footer>
+        <footer>
+          <p>&copy; 2026 ESS School of Management. All rights reserved.</p>
+        </footer>
 
       </div>
       
