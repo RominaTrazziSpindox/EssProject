@@ -190,7 +190,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
         setFeedback(isTest ? buildTestUnauthorizedFeedback(index) : buildUnauthorizedFeedback());
         return 'break';
 
-      case 'RATE_LIMITED':
+      case 'TOO_MANY_REQUESTS':
         setRateLimitInfo((current) => ({
           ...current,
           requestCount,
@@ -278,11 +278,9 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
 
           const result = await syncCampaigns(testPayload);
 
-          console.log('TEST SUCCESS', i, result.status);
-
           handleRequestSuccess(result, (status) => buildTestSuccessFeedback(i, status));
 
-          // Pause before the next request so the UI can show each step.
+          // Pause before the next request so the UI can show each step
           if (i < 6) {
             await delay(TEST_DELAY_MS);
           }
@@ -290,11 +288,10 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
 
         } catch (error) {
 
-          console.log('TEST ERROR', i, error.code, error.status, error.message);
-
           const action = handleRequestError(error, { isTest: true, index: i });
 
           if (action === 'continue') {
+
             if (i < 6) {
               await delay(TEST_DELAY_MS);
             }
@@ -307,6 +304,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
       }
 
     } finally {
+
       setIsSubmitting(false);
     }
   };
@@ -316,51 +314,51 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
   // Reset the countdown when the banner is not in warning state
   useEffect(() => {
   
-  if (feedback.type !== 'warning' || !rateLimitInfo?.retryAfter) {
-    setSecondsLeft(0);
-    return;
-  }
-
-  // Initialize the countdown with the number of seconds returned by the backend
-  setSecondsLeft(rateLimitInfo.retryAfter);
-
-  }, [feedback.type, rateLimitInfo?.retryAfter]);
-
-
-  // Stop when the banner is not in warning state or the countdown is not active
-  useEffect(() => {
-   
-    if (feedback.type !== 'warning' || secondsLeft <= 0) {
+    if (feedback.type !== 'warning' || !rateLimitInfo?.retryAfter) {
+      setSecondsLeft(0);
       return;
     }
 
-    const timeoutId = setTimeout(() => {
-      if (secondsLeft <= 1) {
-        
-        setSecondsLeft(0);
+    // Initialize the countdown with the number of seconds returned by the backend
+    setSecondsLeft(rateLimitInfo.retryAfter);
 
-        setFeedback({
-          type: '',
-          message: '',
-        });
+    }, [feedback.type, rateLimitInfo?.retryAfter]);
 
-        setRateLimitInfo((current) => ({
-          ...current,
-          requestCount: 0,
-          retryAfter: null,
-          isRateLimited: false,
-          resetAt: null,
-        }));
 
+    // Stop when the banner is not in warning state or the countdown is not active
+    useEffect(() => {
+    
+      if (feedback.type !== 'warning' || secondsLeft <= 0) {
         return;
       }
 
-      setSecondsLeft((current) => current - 1);
-    }, 1000);
+      const timeoutId = setTimeout(() => {
+        if (secondsLeft <= 1) {
+          
+          setSecondsLeft(0);
 
-    return () => clearTimeout(timeoutId);
-  }, [feedback.type, secondsLeft, setRateLimitInfo]);
-    
+          setFeedback({
+            type: '',
+            message: '',
+          });
+
+          setRateLimitInfo((current) => ({
+            ...current,
+            requestCount: 0,
+            retryAfter: null,
+            isRateLimited: false,
+            resetAt: null,
+          }));
+
+          return;
+        }
+
+        setSecondsLeft((current) => current - 1);
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
+    }, [feedback.type, secondsLeft, setRateLimitInfo]);
+      
 
   /* RENDER */
 

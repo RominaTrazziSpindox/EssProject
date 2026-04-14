@@ -50,12 +50,10 @@ export function buildUnexpectedFeedback() {
 }
 
 // Too many requests (Orange)
-export function buildRateLimitedFeedback(retryAfter) {
+export function buildRateLimitedFeedback() {
   return {
     type: 'warning',
-    message: retryAfter
-      ? `Too many requests (429). Please wait ${retryAfter} seconds before sending again.`
-      : 'Too many requests (429). Please wait before sending again.',
+    message: `Too many requests (429). Plaease wait before sending more requests.`,
   };
 }
 
