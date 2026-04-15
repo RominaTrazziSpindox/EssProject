@@ -59,6 +59,9 @@ app:
       subject: Campaign report
       smoke-test:
         enabled: true
+    excel:
+      smoke-test:
+        enabled: true
 
 logging:
   level:

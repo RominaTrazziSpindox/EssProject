@@ -36,6 +36,14 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok-mapstruct-binding:$lombokMapstructBindingVersion")
 
+    // Libraries for reporting (Excel and PDF)
+
+    // --- Apache POI (for Excel report)
+    implementation("org.apache.poi:poi-ooxml:5.5.1")
+
+    // --- Open PDF (for PDF report)
+    implementation("com.github.librepdf:openpdf:3.0.3")
+
     // --- Testing ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
