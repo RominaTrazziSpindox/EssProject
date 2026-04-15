@@ -1,47 +1,51 @@
 .page {
-  display: grid;
-  grid-template-columns: 20vw auto;
-  min-height: 100vh;
+    display: grid;
+    grid-template-columns: 20vw auto;
+    min-height: 100vh;
 }
 
 .content {
-  display: grid;
-  grid-template-rows: 100px 1fr 50px;
-  min-height: 100vh;
+    display: grid;
+    grid-template-rows: 100px 1fr 50px;
+    min-height: 100vh;
 }
 
 body {
-  color: var(--ess-text-900);
-  background: var(--ess-bg-page);
-  line-height: 1.45;
+    color: var(--ess-text-900);
+    background: var(--ess-bg-page);
+    line-height: 1.45;
 }
 
 header {
-  display: flex;
-  align-items: center;
-  border: 1px solid var(--ess-border);
-  background-color: var(--ess-bg-navbar);
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--ess-border);
+    background-color: var(--ess-bg-navbar);
 }
 
 main {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 5%;
-  padding: 1.5rem;
-  background: var(--ess-bg-page);
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 5%;
+    padding: 1.5rem;
+    background: var(--ess-bg-page);
 }
 
 main > :nth-child(2)  {  
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto ;
-  gap: 1rem;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto ;
+    gap: 1rem;
 }
 
 footer {
-  height: 50px;
-  background: var(--ess-bg-navbar);
-  border: 1px solid var(--ess-border);
-  bottom: 0;
-  width: 100%;
-  text-align: center;
+    font-family: var(--ess-font-ui);
+    font-size: 0.7rem;
+    height: 50px;
+    background: var(--ess-bg-navbar);
+    border: 1px solid var(--ess-border);
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
