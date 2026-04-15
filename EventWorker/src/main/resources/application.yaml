@@ -3,7 +3,7 @@ spring:
     name: event-worker
   sql:
     init:
-      mode: never
+      mode: always
 
   datasource:
     url: jdbc:postgresql://localhost:5432/ess_data
@@ -24,13 +24,25 @@ spring:
     port: 5672
     username: guest
     password: guest
-
     listener:
       simple:
         retry:
           enabled: true
           max-retries: 3
           initial-interval: 1000
+  mail:
+    host: localhost
+    port: 1025
+    protocol: smtp
+    username: ""
+    password: ""
+    properties:
+      "[mail.smtp.auth]": false
+      "[mail.smtp.starttls.enable]": false
+      "[mail.smtp.connectiontimeout]": 5000
+      "[mail.smtp.timeout]": 3000
+      "[mail.smtp.writetimeout]": 5000
+
 
 app:
   rabbit:
@@ -39,6 +51,18 @@ app:
     routing-key: crm.campaign.created
     dlq: crm.campaigns.dlq
     dlx: crm.dlx
+
+  report:
+    email:
+      from: no-reply@local.test
+      to: admin@local.test
+      subject: Campaign report
+      smoke-test:
+        enabled: true
+
+logging:
+  level:
+    org.springframework.amqp: DEBUG
 
 server:
   port: 8081

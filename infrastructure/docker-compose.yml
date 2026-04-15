@@ -1,7 +1,7 @@
 services:
 
   postgres:
-    image: postgres:16
+    image: postgres:17
     container_name: ess-postgres
     environment:
       POSTGRES_DB: ess_data
@@ -29,3 +29,10 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: crm-mailhog
+    ports:
+      - "1025:1025"   # DefaultSMTP port used by the application
+      - "8025:8025"   # Default Web UI used by developers
