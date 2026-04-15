@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS campaigns (
     sub_campaign_id VARCHAR(255)
 );
 
-CREATE UNIQUE INDEX campaign_business_key
+CREATE UNIQUE INDEX IF NOT EXISTS  campaign_business_key
 ON campaigns (campaign_id, sub_campaign_id) NULLS NOT DISTINCT;
 
 CREATE TABLE IF NOT EXISTS attendees (
