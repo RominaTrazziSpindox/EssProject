@@ -1,6 +1,5 @@
 package integrations;
 
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -9,16 +8,15 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @Testcontainers
-@SpringBootTest
 public abstract class AbstractIntegrationTest {
 
     @Container
-    static RabbitMQContainer rabbitMQ = new RabbitMQContainer("rabbitmq:3-management");
-
+    static final RabbitMQContainer rabbitMQ =
+            new RabbitMQContainer("rabbitmq:3-management");
 
     @Container
-    static PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:16")
+    static final PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:17")
                     .withDatabaseName("test_db")
                     .withUsername("test")
                     .withPassword("test");

@@ -1,57 +1,34 @@
 package integrations;
 
 import com.spx.EventWorkerApplication;
-import com.spx.config.RabbitConfig;
+import com.spx.config.RabbitProperties;
 import com.spx.dto.CampaignEventDTO;
 import com.spx.models.Campaign;
 import com.spx.repos.CampaignRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
+
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(classes = EventWorkerApplication.class)
 @Testcontainers
-@Import(RabbitConfig.class)
 class EventWorkerIntegrationTest extends AbstractIntegrationTest {
-
-
-    // Constants
-    private static final String EXCHANGE = "crm.exchange";
-    private static final String ROUTING_KEY = "crm.campaign.created";
-    private static final String QUEUE_NAME_DLQ = "crm.campaign.dlq";
 
     // Configurations
     @BeforeEach
-    void setupRabbitTopology() {
-
-        Queue queue = new Queue(QUEUE_NAME_DLQ);
-        DirectExchange exchange = new DirectExchange("crm.exchange");
-
-        rabbitAdmin.declareExchange(exchange);
-        rabbitAdmin.declareQueue(queue);
-
-        rabbitAdmin.declareBinding(BindingBuilder.bind(queue)
-                .to(exchange)
-                .with("crm.campaign.created")
-        );
-    }
-
-    @BeforeEach
-    void cleanQueue() {
-        rabbitAdmin.purgeQueue(QUEUE_NAME_DLQ, true);
+    void cleanState() {
+        rabbitAdmin.purgeQueue(rabbitProperties.getQueue(), true);
+        rabbitAdmin.purgeQueue(rabbitProperties.getDlq(), true);
+        campaignRepository.deleteAll();
     }
 
     // Injections
@@ -64,6 +41,8 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private CampaignRepository campaignRepository;
 
+    @Autowired
+    private RabbitProperties rabbitProperties;
 
     // TEST AREA
     @Test
@@ -81,7 +60,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
             );
 
             assertTrue(campaignOptional.isPresent(), "Campaign should be present");
-            assertEquals(1, getAttendeesCount(campaignEventDTO),"Campaign should have 1 attendee");
+            assertEquals(1, getAttendeesCount(campaignEventDTO), "Campaign should have 1 attendee");
         });
     }
 
@@ -97,8 +76,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
 
             long count = getAttendeesCount(firstCampaignEventDTO);
 
-            assertEquals(2, count,"Expected 2 attendees after first message campaign. Attendees found: " + count);
-
+            assertEquals(2, count, "Expected 2 attendees after first message campaign. Attendees found: " + count);
         });
 
         // STEP 2 - publish second message campaign (1 attendee, same campaign)
@@ -110,8 +88,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
 
             long count = getAttendeesCount(secondCampaignEventDTO);
 
-            assertEquals(1, count,"The campaign should have 1 attendee after update. Attendees found: " + count);
-
+            assertEquals(1, count, "The campaign should have 1 attendee after update. Attendees found: " + count);
         });
     }
 
@@ -144,7 +121,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
 
-            Object message = rabbitTemplate.receiveAndConvert(QUEUE_NAME_DLQ);
+            Object message = rabbitTemplate.receiveAndConvert(rabbitProperties.getDlq());
 
             assertNotNull(message, "Message should be in DLQ");
         });
@@ -159,10 +136,9 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
 
-            Object raw = rabbitTemplate.receiveAndConvert(QUEUE_NAME_DLQ);
+            Object raw = rabbitTemplate.receiveAndConvert(rabbitProperties.getDlq());
 
             assertNotNull(raw, "DLQ message should not be null");
-
             assertTrue(raw instanceof CampaignEventDTO, "Message should be CampaignEventDTO");
 
             CampaignEventDTO dlqMessage = (CampaignEventDTO) raw;
@@ -172,10 +148,13 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
         });
     }
 
-
     // HELPER METHODS
     private void publish(CampaignEventDTO dto) {
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, dto);
+        rabbitTemplate.convertAndSend(
+                rabbitProperties.getExchange(),
+                rabbitProperties.getRoutingKey(),
+                dto
+        );
     }
 
     private long getAttendeesCount(CampaignEventDTO dto) {

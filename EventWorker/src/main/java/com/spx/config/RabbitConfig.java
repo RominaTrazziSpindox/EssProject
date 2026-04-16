@@ -1,8 +1,8 @@
 package com.spx.config;
 
 import org.springframework.amqp.core.*;
-import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.support.converter.JacksonJsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,8 +25,8 @@ public class RabbitConfig {
     @Bean
     public Queue campaignQueue() {
         return QueueBuilder.durable(rabbitProperties.getQueue())
-                .withArgument("x-dead-letter-exchange", rabbitProperties.getDlx())
-                .withArgument("x-dead-letter-routing-key", rabbitProperties.getQueue())
+                .deadLetterExchange(rabbitProperties.getDlx())
+                .deadLetterRoutingKey(rabbitProperties.getDlq())
                 .build();
     }
 
@@ -64,13 +64,13 @@ public class RabbitConfig {
         return new DirectExchange(rabbitProperties.getDlx());
     }
 
-    // Binding DLQ → DLX
+    // Binding between DLX and DLQ
     @Bean
     public Binding dlqBinding() {
         return BindingBuilder
                 .bind(deadLetterQueue())
                 .to(deadLetterExchange())
-                .with(rabbitProperties.getQueue());
+                .with(rabbitProperties.getDlq());
     }
 
     // -------- JSON Converter: converter used to deserialize JSON messages coming from RabbitMQ into DTO objects. --------
@@ -88,9 +88,12 @@ public class RabbitConfig {
      * @return the simple rabbit listener container factory
      */
     @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory (ConnectionFactory connectionFactory, JacksonJsonMessageConverter messageConverter) {
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
+            ConnectionFactory connectionFactory,
+            JacksonJsonMessageConverter messageConverter) {
 
-        SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory = new SimpleRabbitListenerContainerFactory();
+        SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory =
+                new SimpleRabbitListenerContainerFactory();
 
         // Set the connection as connectionFactory object
         rabbitListenerContainerFactory.setConnectionFactory(connectionFactory);
