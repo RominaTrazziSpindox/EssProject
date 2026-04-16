@@ -5,7 +5,7 @@ package com.spx.dto;
  * This model contains campaign-level calculated values used for reporting
  * and chart generation.
  */
-public record CampaignAggregatedDataDTO(
+public record CampaignAggregatedDataDTO (
         String campaignDisplayName,
         int attendeeCount,
         int mainAttendeeCount,
@@ -19,7 +19,6 @@ public record CampaignAggregatedDataDTO(
         double averageAge,
         int youngAttendeeCount,
         int adultAttendeeCount,
-        int seniorAttendeeCount,
-        int unknownAgeCount
+        int seniorAttendeeCount
 ) {
 }
