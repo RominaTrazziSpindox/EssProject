@@ -2,6 +2,7 @@ package com.spx.services;
 
 import com.spx.dto.CampaignReportDTO;
 import com.spx.mappers.CampaignReportMapper;
+import com.spx.models.Campaign;
 import com.spx.repos.CampaignRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,8 +34,12 @@ public class CampaignReportQueryService {
      */
     @Transactional(readOnly = true)
     public List<CampaignReportDTO> getAllCampaignsForReport() {
-        List<CampaignReportDTO> reportSections = campaignRepository.findAllByOrderByCampaignIdAsc()
-                .stream()
+
+        List<Campaign> campaigns = campaignRepository.findAllByOrderByCampaignIdAsc();
+
+        // log.info("REPORT DEBUG - campaigns loaded from DB: {}", campaigns.size());
+
+        List<CampaignReportDTO> reportSections = campaigns.stream()
                 .map(campaignReportMapper::toReportSection)
                 .toList();
 

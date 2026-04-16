@@ -7,6 +7,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.springframework.stereotype.Service;
 
+
 import java.util.List;
 
 // Service responsible for generating the Excel dashboard workbook (= summary sheet + chart sheets).
@@ -42,9 +43,9 @@ public class CampaignExcelDashboardReportService {
 
             // Create the chart sheets
             dashboardChartBuilderService.createAttendanceOverviewSheet(workbook, summarySheet, aggregateRows);
-            HelperExcelStylesheet.createPlaceholderSheet(workbook, "Composition");
-            HelperExcelStylesheet.createPlaceholderSheet(workbook, "Age Analysis");
-            HelperExcelStylesheet.createPlaceholderSheet(workbook, "Data Quality");
+            dashboardChartBuilderService.createCompositionSheet(workbook, summarySheet, aggregateRows);
+            dashboardChartBuilderService.createAgeAnalysisSheet(workbook, summarySheet, aggregateRows);
+            dashboardChartBuilderService.createDataQualitySheet(workbook, summarySheet, aggregateRows);
         });
     }
 
@@ -100,19 +101,19 @@ public class CampaignExcelDashboardReportService {
             Row row = sheet.createRow(rowIndex++);
 
             HelperExcelStylesheet.createCell(row, 0, aggregateRow.campaignDisplayName(), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 1, String.valueOf(aggregateRow.attendeeCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 2, String.valueOf(aggregateRow.mainAttendeeCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 3, String.valueOf(aggregateRow.companionCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 4, String.valueOf(aggregateRow.mainAttendeeRate()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 5, String.valueOf(aggregateRow.companionRate()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 6, String.valueOf(aggregateRow.averageAge()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 7, String.valueOf(aggregateRow.youngAttendeeCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 8, String.valueOf(aggregateRow.adultAttendeeCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 9, String.valueOf(aggregateRow.seniorAttendeeCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 10, String.valueOf(aggregateRow.missingBirthDateCount()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 11, String.valueOf(aggregateRow.missingCnCount()), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 1, aggregateRow.attendeeCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 2, aggregateRow.mainAttendeeCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 3, aggregateRow.companionCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 4, aggregateRow.mainAttendeeRate(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 5, aggregateRow.companionRate(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 6, aggregateRow.averageAge(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 7, aggregateRow.youngAttendeeCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 8, aggregateRow.adultAttendeeCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 9, aggregateRow.seniorAttendeeCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 10, aggregateRow.missingBirthDateCount(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 11, aggregateRow.missingCnCount(), centeredValueStyle);
             HelperExcelStylesheet.createCell(row, 12, aggregateRow.hasSubCampaign() ? "Yes" : "No", centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 13, String.valueOf(aggregateRow.dataCompletenessRate()), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 13, aggregateRow.dataCompletenessRate(), centeredValueStyle);
         }
 
         // Column size

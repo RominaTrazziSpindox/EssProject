@@ -106,6 +106,27 @@ public final class HelperExcelStylesheet {
         }
     }
 
+
+    // Overload of CreateCell method
+
+    public static void createCell(Row row, int columnIndex, int value, CellStyle style) {
+        Cell cell = row.createCell(columnIndex);
+        cell.setCellValue(value);
+
+        if (style != null) {
+            cell.setCellStyle(style);
+        }
+    }
+
+    public static void createCell(Row row, int columnIndex, double value, CellStyle style) {
+        Cell cell = row.createCell(columnIndex);
+        cell.setCellValue(value);
+
+        if (style != null) {
+            cell.setCellStyle(style);
+        }
+    }
+
     /**
      * Applies the default layout used by standard report sheets.
      *

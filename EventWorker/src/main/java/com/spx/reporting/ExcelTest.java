@@ -57,10 +57,10 @@ public class ExcelTest implements ApplicationRunner {
         List<CampaignAggregatedDataDTO> aggregateRows = campaignAggregateDataService.buildAggregateDataList(campaignSections);
 
         // Creates the detailed Excel report file, including one sheet for each campaign
-        byte[] detailExcelReport = campaignExcelDetailService.generateReport(campaignSections);
+        byte[] detailExcelReport = campaignExcelDetailService.generateDetailWorkbook(campaignSections);
 
         // Creates the dashboard Excel report file, containing aggregated data only
-        byte[] dashboardExcelReport = campaignExcelDashboardReportService.generateDashboardReport(aggregateRows);
+        byte[] dashboardExcelReport = campaignExcelDashboardReportService.generateDashboardWorkbook(aggregateRows);
 
         // Path and Filename of the Excel files (\build\reports)
         Path outputDirectory = Path.of("build", "reports");
