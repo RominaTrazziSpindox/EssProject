@@ -4,13 +4,12 @@ import com.spx.dto.CampaignAggregatedDataDTO;
 import com.spx.dto.CampaignReportDTO;
 import com.spx.services.CampaignAggregatedDataService;
 import com.spx.services.CampaignExcelDetailService;
-import com.spx.services.CampaignReportQueryService;
 import com.spx.services.CampaignExcelDashboardReportService;
+import com.spx.services.CampaignReportQueryService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,7 +23,6 @@ import java.util.List;
 @Component
 @Slf4j
 @ConditionalOnBooleanProperty(prefix = "app.report.excel.smoke-test", name = "enabled", havingValue = true, matchIfMissing = false)
-
 public class ExcelTest implements ApplicationRunner {
 
     // Constants
@@ -34,14 +32,15 @@ public class ExcelTest implements ApplicationRunner {
     private final CampaignExcelDashboardReportService campaignExcelDashboardReportService;
 
     // Constructor
-    public ExcelTest(CampaignReportQueryService campaignReportQueryService, CampaignExcelDetailService campaignExcelDetailService,
+    public ExcelTest(CampaignReportQueryService campaignReportQueryService,
+                     CampaignExcelDetailService campaignExcelDetailService,
                      CampaignAggregatedDataService campaignAggregateDataService,
-                     CampaignExcelDashboardReportService campaignDashboardExcelReportService) {
+                     CampaignExcelDashboardReportService campaignExcelDashboardReportService) {
 
         this.campaignReportQueryService = campaignReportQueryService;
         this.campaignExcelDetailService = campaignExcelDetailService;
         this.campaignAggregateDataService = campaignAggregateDataService;
-        this.campaignExcelDashboardReportService = campaignDashboardExcelReportService;
+        this.campaignExcelDashboardReportService = campaignExcelDashboardReportService;
     }
 
     @Override
@@ -57,8 +56,8 @@ public class ExcelTest implements ApplicationRunner {
          This list is typically used for summary views, metrics, and dashboard charts. */
         List<CampaignAggregatedDataDTO> aggregateRows = campaignAggregateDataService.buildAggregateDataList(campaignSections);
 
-        // Creates the detailed Excel report file, including campaign sections and aggregate rows
-        byte[] detailExcelReport = campaignExcelDetailService.generateReport(campaignSections, aggregateRows);
+        // Creates the detailed Excel report file, including one sheet for each campaign
+        byte[] detailExcelReport = campaignExcelDetailService.generateReport(campaignSections);
 
         // Creates the dashboard Excel report file, containing aggregated data only
         byte[] dashboardExcelReport = campaignExcelDashboardReportService.generateDashboardReport(aggregateRows);
