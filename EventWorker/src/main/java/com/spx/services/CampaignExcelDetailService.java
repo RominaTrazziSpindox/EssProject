@@ -4,18 +4,21 @@ import com.spx.dto.CampaignReportDTO;
 import com.spx.helper.HelperExcelStylesheet;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.WorkbookUtil;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.List;
 
-// Service responsible for generating the Excel report content.
+// Service responsible for generating the Excel report content for each campaign (= detail).
 @Service
 public class CampaignExcelDetailService {
 
-    // --- MAIN FUNCTIONS
+    // Constants
+    private final ExcelSheetGeneratorService excelSheetGeneratorService;
+
+    // Constructor
+    public CampaignExcelDetailService(ExcelSheetGeneratorService excelSheetGeneratorService) {
+        this.excelSheetGeneratorService = excelSheetGeneratorService;
+    }
 
     /**
      * Generates an Excel workbook in memory starting from the reporting DTOs.
@@ -24,32 +27,29 @@ public class CampaignExcelDetailService {
      * @param campaignSections the campaigns to include in the report
      * @return the generated Excel file as a byte array
      */
-    public byte[] generateReport(List<CampaignReportDTO> campaignSections) {
+    public byte[] generateDetailWorkbook(List<CampaignReportDTO> campaignSections) {
 
-        try (Workbook workbook = new XSSFWorkbook();
-             ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        return excelSheetGeneratorService.generateWorkbook(workbook -> {
 
+            // Sheet style
             CellStyle titleStyle = HelperExcelStylesheet.createTitleStyle(workbook);
             CellStyle headerStyle = HelperExcelStylesheet.createHeaderStyle(workbook);
             CellStyle centeredValueStyle = HelperExcelStylesheet.createCenteredValueStyle(workbook);
 
+            // When no campaigns are available
             if (campaignSections == null || campaignSections.isEmpty()) {
                 Sheet emptySheet = workbook.createSheet("Campaign Report");
                 Row messageRow = emptySheet.createRow(0);
                 HelperExcelStylesheet.createCell(messageRow, 0, "No campaigns available.", centeredValueStyle);
 
             } else {
+
+                // Create one worksheet for each campaign
                 for (CampaignReportDTO campaignSection : campaignSections) {
                     createCampaignSheet(workbook, campaignSection, titleStyle, headerStyle, centeredValueStyle);
                 }
             }
-
-            workbook.write(outputStream);
-            return outputStream.toByteArray();
-
-        } catch (IOException exception) {
-            throw new IllegalStateException("Unable to generate Excel report.", exception);
-        }
+        });
     }
 
     /**
@@ -64,23 +64,21 @@ public class CampaignExcelDetailService {
     private void createCampaignSheet(Workbook workbook,CampaignReportDTO campaignSection,
                                      CellStyle titleStyle, CellStyle headerStyle, CellStyle centeredValueStyle) {
 
-        // Create a new sheet
+        // Create sheet
         String safeSheetName = WorkbookUtil.createSafeSheetName(campaignSection.campaignDisplayName());
         Sheet sheet = workbook.createSheet(safeSheetName);
 
-        // Size of default row and column
-        sheet.setDefaultRowHeightInPoints(20);
-        sheet.setDefaultColumnWidth(18);
+        // Sheet layout
+        HelperExcelStylesheet.applyDefaultSheetLayout(sheet);
 
         int rowIndex = 0;
 
-        // Title of the sheet (Campaign + Subcampaign if exists)
+        // Main header rows
         Row titleRow = sheet.createRow(rowIndex++);
         titleRow.setHeightInPoints(24);
         HelperExcelStylesheet.createCell(titleRow, 0, "Campaign", titleStyle);
         HelperExcelStylesheet.createCell(titleRow, 1, campaignSection.campaignDisplayName(), titleStyle);
 
-        // Total attendee
         Row countRow = sheet.createRow(rowIndex++);
         countRow.setHeightInPoints(22);
         HelperExcelStylesheet.createCell(countRow, 0, "Attendee count", titleStyle);
@@ -88,7 +86,7 @@ public class CampaignExcelDetailService {
 
         rowIndex++;
 
-        // Sub header section
+        // Sub-header rows
         Row headerRow = sheet.createRow(rowIndex++);
         headerRow.setHeightInPoints(22);
         HelperExcelStylesheet.createCell(headerRow, 0, "First Name", headerStyle);
@@ -97,19 +95,24 @@ public class CampaignExcelDetailService {
         HelperExcelStylesheet.createCell(headerRow, 3, "Birth Date", headerStyle);
         HelperExcelStylesheet.createCell(headerRow, 4, "Companion", headerStyle);
 
-        // Value section
+        // Values
         for (CampaignReportDTO.AttendeeReportRow attendeeRow : campaignSection.attendeeRows()) {
-
             Row row = sheet.createRow(rowIndex++);
 
             HelperExcelStylesheet.createCell(row, 0, HelperExcelStylesheet.defaultString(attendeeRow.firstName()), centeredValueStyle);
             HelperExcelStylesheet.createCell(row, 1, HelperExcelStylesheet.defaultString(attendeeRow.lastName()), centeredValueStyle);
             HelperExcelStylesheet.createCell(row, 2, HelperExcelStylesheet.defaultString(attendeeRow.cn()), centeredValueStyle);
-            HelperExcelStylesheet.createCell(row, 3, attendeeRow.birthDate() == null ? "" : attendeeRow.birthDate().toString(), centeredValueStyle);
-            HelperExcelStylesheet.createCell( row, 4, Boolean.TRUE.equals(attendeeRow.companion()) ? "Yes" : "No", centeredValueStyle);
-
-            // Size of each column
-            HelperExcelStylesheet.applyColumnSizing(sheet, HelperExcelStylesheet.DETAIL_SHEET_WIDTHS);
+            HelperExcelStylesheet.createCell(row,3, attendeeRow.birthDate() == null ? "" : attendeeRow.birthDate().toString(), centeredValueStyle);
+            HelperExcelStylesheet.createCell(row, 4, Boolean.TRUE.equals(attendeeRow.companion()) ? "Yes" : "No", centeredValueStyle);
         }
+
+        // Column size
+        HelperExcelStylesheet.applyColumnSizing(sheet, new int[]{
+                HelperExcelStylesheet.excelWidth(18),
+                HelperExcelStylesheet.excelWidth(18),
+                HelperExcelStylesheet.excelWidth(20),
+                HelperExcelStylesheet.excelWidth(14),
+                HelperExcelStylesheet.excelWidth(12)
+        });
     }
 }
