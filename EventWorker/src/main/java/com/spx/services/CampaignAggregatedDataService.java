@@ -6,28 +6,29 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
-/**
- * Service responsible for calculating campaign-level aggregated data
- * used by the Excel summary sheet and charts.
- */
+// Service responsible for calculating campaign aggregated data used by the Excel summary sheet and charts.
+
 @Service
 public class CampaignAggregatedDataService {
 
     /**
-     * Builds one aggregated data row starting from one campaign report DTO.
+     * Builds one aggregated data row starting from one CampaignReportDTO
+     * which contains both type of data (from Campaigns and from Attendees).
      *
      * @param campaignReport the source campaign report data
-     * @return the calculated aggregate data for the selected campaign
+     * @return the calculated aggregate data for the selected campaign in
+     * a new DTO called CampaignAggregatedDataDTO.
      */
-    public CampaignAggregatedDataDTO buildAggregateData(CampaignReportDTO campaignReport) {
+    public CampaignAggregatedDataDTO buildAggregatedData(CampaignReportDTO campaignReport) {
 
-        List<CampaignReportDTO.AttendeeReportRow> attendeeRows = campaignReport.attendeeRows();
+        // Retrieve attendee rows from the DTO or use an empty list if the source list is null
+        List<CampaignReportDTO.AttendeeReportRow> attendeeRows = campaignReport.attendeeRows() == null ? Collections.emptyList() : campaignReport.attendeeRows();
 
-        // Aggregated properties for each row (with methods filter and counts)
+        // Calculate aggregated properties for each row of attendees (with filter and counts)
         int attendeeCount = attendeeRows.size();
 
         int mainAttendeeCount = (int) attendeeRows.stream()
@@ -51,54 +52,50 @@ public class CampaignAggregatedDataService {
                 .filter(attendee -> attendee.birthDate() != null)
                 .count();
 
-        int youngAttendeeCount = (int) attendeeRows.stream()
-                .filter(attendee -> calculateAge(attendee.birthDate()) != null)
-                .filter(attendee -> calculateAge(attendee.birthDate()) <= 29)
+        // Build the "ages list"
+        List<Integer> ages = attendeeRows
+                .stream()
+                .map(CampaignReportDTO.AttendeeReportRow::birthDate)
+                .map(this::calculateAge)
+                .filter(Objects::nonNull)
+                .toList();
+
+        int youngAttendeeCount = (int) ages.stream()
+                .filter(age -> age <= 29)
                 .count();
 
-        int adultAttendeeCount = (int) attendeeRows.stream()
-                .filter(attendee -> calculateAge(attendee.birthDate()) != null)
-                .filter(attendee -> {
-                    int age = calculateAge(attendee.birthDate());
-                    return age >= 30 && age <= 49;
-                })
+        int adultAttendeeCount = (int) ages.stream()
+                .filter(age -> age >= 30 && age <= 49)
                 .count();
 
-        int seniorAttendeeCount = (int) attendeeRows.stream()
-                .filter(attendee -> calculateAge(attendee.birthDate()) != null)
-                .filter(attendee -> calculateAge(attendee.birthDate()) >= 50)
+        int seniorAttendeeCount = (int) ages.stream()
+                .filter(age -> age >= 50)
                 .count();
 
+        // Percentage values
         double companionRate = calculatePercentage(companionCount, attendeeCount);
         double mainAttendeeRate = calculatePercentage(mainAttendeeCount, attendeeCount);
         double dataCompletenessRate = calculatePercentage(completeRecordCount, attendeeCount);
-        double averageAge = calculateAverageAge(attendeeRows);
+        double averageAge = calculateAverageAge(ages);
 
         // Values returned
         return new CampaignAggregatedDataDTO(
-                campaignReport.campaignDisplayName(), attendeeCount, mainAttendeeCount, companionCount, companionRate,
-                mainAttendeeRate, campaignReport.subCampaignId() != null && !campaignReport.subCampaignId().isBlank(),
-                missingCnCount, missingBirthDateCount, dataCompletenessRate, averageAge, youngAttendeeCount,
-                adultAttendeeCount, seniorAttendeeCount
+                campaignReport.campaignDisplayName(),
+                attendeeCount,
+                mainAttendeeCount,
+                companionCount,
+                companionRate,
+                mainAttendeeRate,
+                campaignReport.subCampaignId() != null && !campaignReport.subCampaignId().isBlank(),
+                missingCnCount,
+                missingBirthDateCount,
+                dataCompletenessRate,
+                averageAge,
+                youngAttendeeCount,
+                adultAttendeeCount,
+                seniorAttendeeCount
         );
     }
-
-    /**
-     * Builds aggregated data rows for all campaign report sections.
-     *
-     * @param campaignReports the source campaign report sections
-     * @return the aggregated data rows used by the summary sheet
-     */
-    public List<CampaignAggregatedDataDTO> buildAggregateDataList(List<CampaignReportDTO> campaignReports) {
-        if (campaignReports == null || campaignReports.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return campaignReports.stream()
-                .map(this::buildAggregateData)
-                .toList();
-    }
-
 
     // --- HELPER FUNCTIONS ---
 
@@ -137,16 +134,11 @@ public class CampaignAggregatedDataService {
      * Helper function to calculate the average age considering only attendees
      * with a non-null date of birth.
      *
-     * @param attendeeRows the attendee rows of the selected campaign
+     * @param ages the calculated ages of the selected campaign attendees
      * @return the average age rounded to two decimal places
      */
-    private double calculateAverageAge(List<CampaignReportDTO.AttendeeReportRow> attendeeRows) {
-        List<Integer> ages = attendeeRows.stream()
-                .map(attendee -> calculateAge(attendee.birthDate()))
-                .filter(Objects::nonNull)
-                .toList();
-
-        if (ages.isEmpty()) {
+    private double calculateAverageAge(List<Integer> ages) {
+        if (ages == null || ages.isEmpty()) {
             return 0.0;
         }
 
