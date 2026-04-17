@@ -14,6 +14,7 @@ repositories {
 
 val mapstructVersion = "1.6.0"
 val lombokMapstructBindingVersion = "0.2.0"
+val poiVersion = "5.5.1"
 
 dependencies {
 
@@ -39,10 +40,9 @@ dependencies {
     // Libraries for reporting (Excel and PDF)
 
     // --- Apache POI (for Excel report)
-    implementation("org.apache.poi:poi-ooxml:5.5.1")
-
-    // --- Open PDF (for PDF report)
-    implementation("com.github.librepdf:openpdf:3.0.3")
+    implementation("org.apache.poi:poi:$poiVersion")
+    implementation("org.apache.poi:poi-ooxml:$poiVersion")
+    implementation("org.apache.poi:poi-ooxml-full:$poiVersion")
 
     // --- Testing ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
