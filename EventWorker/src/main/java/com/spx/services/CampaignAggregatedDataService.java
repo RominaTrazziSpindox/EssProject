@@ -97,6 +97,23 @@ public class CampaignAggregatedDataService {
         );
     }
 
+    /**
+     * Builds aggregated data rows for all campaign report sections.
+     *
+     * @param campaignReports the source campaign report sections
+     * @return the aggregated data rows used by the summary sheet
+     */
+    public List<CampaignAggregatedDataDTO> getAllCampaignsAggregatedData(List<CampaignReportDTO> campaignReports) {
+        if (campaignReports == null || campaignReports.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return campaignReports
+                .stream()
+                .map(this::buildAggregatedData)
+                .toList();
+    }
+
     // --- HELPER FUNCTIONS ---
 
 
