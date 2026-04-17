@@ -10,19 +10,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/* Service responsible for retrieving all campaigns with their related attendees, converts them into CampaignReportDTO objects, and provides the
-report-ready data used by the aggregation and Excel generation services. */
+/* Service responsible for retrieving all campaigns with their related attendees from the database,
+converts them into CampaignReportDTO objects, and provides the report-ready data used by the aggregation
+and Excel generation services. */
 
 @Service
 @Slf4j
-public class CampaignReportQueryService {
+public class CampaignRetrievalService {
 
     // Constants
     private final CampaignRepository campaignRepository;
     private final CampaignReportMapper campaignReportMapper;
 
     // Constructor
-    public CampaignReportQueryService(CampaignRepository campaignRepository, CampaignReportMapper campaignReportMapper) {
+    public CampaignRetrievalService(CampaignRepository campaignRepository, CampaignReportMapper campaignReportMapper) {
         this.campaignRepository = campaignRepository;
         this.campaignReportMapper = campaignReportMapper;
     }
@@ -35,17 +36,14 @@ public class CampaignReportQueryService {
     @Transactional(readOnly = true)
     public List<CampaignReportDTO> getAllCampaignsForReport() {
 
+        // Step 1: Find campaigns
         List<Campaign> campaigns = campaignRepository.findAllByOrderByCampaignIdAsc();
 
-        // log.info("REPORT DEBUG - campaigns loaded from DB: {}", campaigns.size());
-
-        List<CampaignReportDTO> reportSections = campaigns.stream()
+        // Step 2: Transform List<Campaign> Java Object -> DTO
+        return campaigns
+                .stream()
                 .map(campaignReportMapper::toReportSection)
                 .toList();
-
-        log.info("Loaded {} campaign sections for report generation.", reportSections.size());
-
-        return reportSections;
     }
 }
 
