@@ -57,28 +57,13 @@ public class CampaignExcelDetailService {
 
             // Create one worksheet for each campaign.
             for (CampaignReportDTO campaignReport : campaignReports) {
-                createCampaignSheet(workbook, campaignReport, titleStyle, headerStyle, bodyCellStyle, usedSheetNames);
+                createCampaignSingleSheet(workbook, campaignReport, titleStyle, headerStyle, bodyCellStyle, usedSheetNames);
             }
 
             log.info("Campaign detail workbook generated successfully.");
         });
     }
 
-    /**
-     * Creates a fallback sheet when no campaigns are available.
-     *
-     * @param workbook the target workbook
-     * @param bodyCellStyle the style used for the message cell
-     */
-    private void createEmptySheet(Workbook workbook, CellStyle bodyCellStyle) {
-        Sheet emptySheet = workbook.createSheet("Campaign Report");
-        Row messageRow = emptySheet.createRow(0);
-
-        HelperExcelStylesheet.createCell(messageRow, 0, "No campaigns available.", bodyCellStyle);
-        HelperExcelStylesheet.applyColumnSizing(emptySheet, new int[]{
-                HelperExcelStylesheet.excelWidth(30)
-        });
-    }
 
     /**
      * Creates one worksheet for the given campaign and writes
@@ -157,6 +142,24 @@ public class CampaignExcelDetailService {
                 HelperExcelStylesheet.excelWidth(12)
         });
     }
+
+    /**
+     * Creates a fallback sheet when no campaigns are available.
+     *
+     * @param workbook the target workbook
+     * @param bodyCellStyle the style used for the message cell
+     */
+    private void createEmptySheet(Workbook workbook, CellStyle bodyCellStyle) {
+        Sheet emptySheet = workbook.createSheet("Campaign Report");
+        Row messageRow = emptySheet.createRow(0);
+
+        HelperExcelStylesheet.createCell(messageRow, 0, "No campaigns available.", bodyCellStyle);
+        HelperExcelStylesheet.applyColumnSizing(emptySheet, new int[]{
+                HelperExcelStylesheet.excelWidth(30)
+        });
+    }
+
+
 
     /**
      * Builds a unique and Excel-safe sheet name.
