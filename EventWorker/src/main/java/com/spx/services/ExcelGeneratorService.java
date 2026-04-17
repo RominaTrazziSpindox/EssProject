@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 // Service responsible for creating Excel workbooks in memory
 @Service
-public class ExcelSheetGeneratorService {
+public class ExcelGeneratorService {
 
     /**
      * Generates an Excel workbook in memory and returns it as a byte array.
