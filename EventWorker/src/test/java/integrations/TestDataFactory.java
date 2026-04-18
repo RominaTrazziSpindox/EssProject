@@ -41,6 +41,24 @@ public class TestDataFactory {
                 .build();
     }
 
+    public static CampaignEventDTO builderDLQCampaignDTO() {
+        return CampaignEventDTO.builder()
+                .campaignId("C-DLQ")
+                .subCampaignId("SC-DLQ")
+                .attendees(List.of(
+                        AttendeeDTO.builder()
+                                .firstName("Mario")
+                                .lastName("Error")
+                                .birthDate(LocalDate.of(1990, 1, 1))
+                                .partnerId("P-ERR")
+                                .cn("CN-ERR")
+                                .isCompanion(false)
+                                .qrCode("qr-error")
+                                .build()
+                ))
+                .build();
+    }
+
     private static AttendeeDTO attendee(int index) {
         return AttendeeDTO.builder()
                 .firstName("Name" + index)
