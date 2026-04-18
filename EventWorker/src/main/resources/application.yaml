@@ -1,6 +1,7 @@
 spring:
   application:
     name: event-worker
+
   sql:
     init:
       mode: always
@@ -62,6 +63,7 @@ app:
     excel:
       smoke-test:
         enabled: true
+    schedule: "0 */3 * * * *"
 
 logging:
   level:

@@ -154,10 +154,7 @@ public final class HelperExcelCharts {
      * @param columnIndex the source column index
      * @return the numeric data source
      */
-    public static XDDFNumericalDataSource<Double> numericSource(XSSFSheet sheet,
-                                                                int firstDataRow,
-                                                                int lastDataRow,
-                                                                int columnIndex) {
+    public static XDDFNumericalDataSource<Double> numericSource(XSSFSheet sheet, int firstDataRow, int lastDataRow, int columnIndex) {
 
         return XDDFDataSourcesFactory.fromNumericCellRange(
                 sheet, new CellRangeAddress(firstDataRow, lastDataRow, columnIndex, columnIndex)
@@ -171,8 +168,7 @@ public final class HelperExcelCharts {
      * @param seriesTitle the series title
      * @param markerStyle the marker style
      */
-    public static void configureLineSeries(XDDFLineChartData.Series series,
-                                           String seriesTitle, MarkerStyle markerStyle) {
+    public static void configureLineSeries(XDDFLineChartData.Series series, String seriesTitle, MarkerStyle markerStyle) {
 
         series.setTitle(seriesTitle, null);
         series.setSmooth(false);
