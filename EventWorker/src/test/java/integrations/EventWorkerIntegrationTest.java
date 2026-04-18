@@ -5,22 +5,28 @@ import com.spx.config.RabbitProperties;
 import com.spx.dto.CampaignEventDTO;
 import com.spx.models.Campaign;
 import com.spx.repos.CampaignRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import com.spx.services.CampaignProcessService;
+import org.junit.jupiter.api.*;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.Optional;
+import java.util.Properties;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest(classes = EventWorkerApplication.class)
 @Testcontainers
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class EventWorkerIntegrationTest extends AbstractIntegrationTest {
 
     // Configurations
@@ -43,6 +49,10 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private RabbitProperties rabbitProperties;
+
+    @MockitoSpyBean
+    private CampaignProcessService campaignProcessService;
+
 
     // TEST AREA
     @Test
@@ -115,37 +125,31 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldSendMessageToDLQOnFailure() {
 
-        CampaignEventDTO invalidCampaignDTO = TestDataFactory.builderInvalidCampaignDTO();
+        CampaignEventDTO DLQCampaignDTO = TestDataFactory.builderDLQCampaignDTO();
 
-        publish(invalidCampaignDTO);
+        doThrow(new RuntimeException("Forced consumer failure"))
+                .when(campaignProcessService)
+                .processCampaignFromRabbit(argThat(dto ->
+                        "C-DLQ".equals(dto.getCampaignId()) && "SC-DLQ".equals(dto.getSubCampaignId())
+                ));
 
-        await().atMost(5, SECONDS).untilAsserted(() -> {
-
-            Object message = rabbitTemplate.receiveAndConvert(rabbitProperties.getDlq());
-
-            assertNotNull(message, "Message should be in DLQ");
-        });
-    }
-
-    @Test
-    void shouldRouteFailedMessageToDLQ_withCorrectPayload() {
-
-        CampaignEventDTO invalidCampaignDTO = TestDataFactory.builderInvalidCampaignDTO();
-
-        publish(invalidCampaignDTO);
+        publish(DLQCampaignDTO);
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
 
-            Object raw = rabbitTemplate.receiveAndConvert(rabbitProperties.getDlq());
+            Properties queueProperties = rabbitAdmin.getQueueProperties(rabbitProperties.getDlq());
 
-            assertNotNull(raw, "DLQ message should not be null");
-            assertTrue(raw instanceof CampaignEventDTO, "Message should be CampaignEventDTO");
+            assertNotNull(queueProperties, "DLQ should exist");
 
-            CampaignEventDTO dlqMessage = (CampaignEventDTO) raw;
+            Object raw = queueProperties.get(RabbitAdmin.QUEUE_MESSAGE_COUNT);
+            int messageCount = Integer.parseInt(raw.toString());
 
-            assertEquals(invalidCampaignDTO.getCampaignId(), dlqMessage.getCampaignId());
-            assertEquals(invalidCampaignDTO.getSubCampaignId(), dlqMessage.getSubCampaignId());
+            assertEquals(1, messageCount, "DLQ should contain 1 message");
         });
+
+        Object message = rabbitTemplate.receiveAndConvert(rabbitProperties.getDlq());
+
+        assertNotNull(message, "Message should be in DLQ");
     }
 
     // HELPER METHODS

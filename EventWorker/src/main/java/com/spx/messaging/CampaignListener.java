@@ -3,7 +3,6 @@ package com.spx.messaging;
 import com.spx.dto.CampaignEventDTO;
 import com.spx.services.CampaignProcessService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -39,9 +38,9 @@ public class CampaignListener {
         } catch (RuntimeException ex) {
 
             // Error handling
-
-            log.error("Error processing campaign - campaignId={}, subCampaignId={}", campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), ex);
-            throw new AmqpRejectAndDontRequeueException(ex);
+            log.error("Error processing campaign - campaignId={}, subCampaignId={}, reason={}",
+                    campaignEventDTO.getCampaignId(), campaignEventDTO.getSubCampaignId(), ex.getMessage());
+            throw ex;
         }
     }
 }

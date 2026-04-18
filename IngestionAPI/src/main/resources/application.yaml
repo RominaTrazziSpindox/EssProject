@@ -20,6 +20,7 @@ app:
 logging:
   level:
     org.springframework.amqp: DEBUG
+    org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler: OFF
 
 security:
   api-key: secret-key
