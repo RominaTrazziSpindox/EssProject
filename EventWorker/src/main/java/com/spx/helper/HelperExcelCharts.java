@@ -2,24 +2,22 @@ package com.spx.helper;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xddf.usermodel.chart.AxisCrosses;
-import org.apache.poi.xddf.usermodel.chart.AxisPosition;
-import org.apache.poi.xddf.usermodel.chart.LegendPosition;
-import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
-import org.apache.poi.xddf.usermodel.chart.XDDFCategoryDataSource;
-import org.apache.poi.xddf.usermodel.chart.XDDFDataSourcesFactory;
-import org.apache.poi.xddf.usermodel.chart.XDDFLineChartData;
-import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
-import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
 import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarSer;
+import org.openxmlformats.schemas.drawingml.x2006.chart.CTDLbls;
+import org.openxmlformats.schemas.drawingml.x2006.chart.STDLblPos;
+
+import java.lang.reflect.Field;
 
 // Utility class containing shared helpers for Excel chart sheets and chart configuration.
 public final class HelperExcelCharts {
 
+    // Constructor
     private HelperExcelCharts() {
     }
 
@@ -63,9 +61,7 @@ public final class HelperExcelCharts {
      * @param legendPosition the legend position
      * @return the created chart
      */
-    public static XSSFChart createChart(XSSFSheet sheet,
-                                        int col1, int row1, int col2, int row2,  String title,
-                                        LegendPosition legendPosition) {
+    public static XSSFChart createChart(XSSFSheet sheet, int col1, int row1, int col2, int row2,  String title,LegendPosition legendPosition) {
 
         XSSFDrawing drawing = sheet.createDrawingPatriarch();
         XSSFClientAnchor anchor = new XSSFClientAnchor(0, 0, 0, 0, col1, row1, col2, row2);
@@ -90,12 +86,7 @@ public final class HelperExcelCharts {
      * @return the configured value axis
      */
     public static XDDFValueAxis createCountAxis(XSSFChart chart, AxisPosition position, String title) {
-
-        XDDFValueAxis valueAxis = chart.createValueAxis(position);
-        valueAxis.setTitle(title);
-        valueAxis.setCrosses(AxisCrosses.AUTO_ZERO);
-
-        return valueAxis;
+        return createValueAxis(chart, position, title, 0d, null, "0");
     }
 
     /**
@@ -109,12 +100,12 @@ public final class HelperExcelCharts {
      * @param numberFormat the optional number format
      * @return the configured value axis
      */
-    public static XDDFValueAxis createValueAxis(XSSFChart chart,
-                                                AxisPosition position, String title,
-                                                Double minValue, Double maxValue, String numberFormat) {
+    public static XDDFValueAxis createValueAxis(XSSFChart chart, AxisPosition position, String title, Double minValue, Double maxValue,String numberFormat) {
 
         XDDFValueAxis valueAxis = chart.createValueAxis(position);
         valueAxis.setTitle(title);
+        valueAxis.setCrosses(AxisCrosses.AUTO_ZERO);
+        valueAxis.setCrossBetween(AxisCrossBetween.BETWEEN);
 
         if (minValue != null) {
             valueAxis.setMinimum(minValue);
@@ -131,6 +122,19 @@ public final class HelperExcelCharts {
         return valueAxis;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
     /**
      * Creates a category data source from the given sheet range.
      *
@@ -140,9 +144,7 @@ public final class HelperExcelCharts {
      * @param columnIndex the source column index
      * @return the category data source
      */
-    public static XDDFCategoryDataSource categorySource(XSSFSheet sheet,
-                                                        int firstDataRow, int lastDataRow, int columnIndex) {
-
+    public static XDDFCategoryDataSource categorySource(XSSFSheet sheet, int firstDataRow, int lastDataRow, int columnIndex) {
         return XDDFDataSourcesFactory.fromStringCellRange(sheet,
                 new CellRangeAddress(firstDataRow, lastDataRow, columnIndex, columnIndex)
         );
@@ -177,6 +179,33 @@ public final class HelperExcelCharts {
         series.setSmooth(false);
         series.setMarkerStyle(markerStyle);
         series.setMarkerSize((short) 6);
+    }
+
+    public static void addOutsideEndValueLabelsToBar(XDDFBarChartData.Series series) {
+        try {
+            Field seriesField = XDDFBarChartData.Series.class.getDeclaredField("series");
+            seriesField.setAccessible(true);
+
+            CTBarSer ctBarSer = (CTBarSer) seriesField.get(series);
+
+            if (ctBarSer.isSetDLbls()) {
+                ctBarSer.unsetDLbls();
+            }
+
+            CTDLbls dataLabels = ctBarSer.addNewDLbls();
+            dataLabels.addNewDLblPos().setVal(STDLblPos.OUT_END);
+
+            dataLabels.addNewShowVal().setVal(true);
+            dataLabels.addNewShowLegendKey().setVal(false);
+            dataLabels.addNewShowCatName().setVal(false);
+            dataLabels.addNewShowSerName().setVal(false);
+            dataLabels.addNewShowPercent().setVal(false);
+            dataLabels.addNewShowBubbleSize().setVal(false);
+            dataLabels.addNewShowLeaderLines().setVal(false);
+
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Unable to configure bar chart data labels.", exception);
+        }
     }
 
     /**
@@ -230,4 +259,7 @@ public final class HelperExcelCharts {
         Row row = sheet.getRow(rowIndex) == null ? sheet.createRow(rowIndex) : sheet.getRow(rowIndex);
         row.createCell(columnIndex).setCellValue(value == null ? 0d : value.doubleValue());
     }
+
+
+
 }

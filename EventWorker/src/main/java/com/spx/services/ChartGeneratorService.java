@@ -45,7 +45,7 @@ public class ChartGeneratorService {
     private static final int FIRST_CHART_TOP_ROW = 1;
     private static final int FIRST_CHART_BOTTOM_ROW = 20;
     private static final int SECOND_CHART_TOP_ROW = 22;
-    private static final int SECOND_CHART_BOTTOM_ROW = 41;
+    private static final int SECOND_CHART_BOTTOM_ROW = 45;
 
     /* --- CREATING SHEETS --- */
 
@@ -62,7 +62,7 @@ public class ChartGeneratorService {
         log.info("Building Attendance Overview chart sheet.");
 
         // Create a new horizontal bar chart
-        XSSFSheet chartSheet = HelperExcelCharts.createChartSheet(workbook, "Attendance Overview");
+        XSSFSheet chartSheet = HelperExcelCharts.createChartSheet(workbook, "Total Attendees by Campaign");
 
         // Stop early when no dashboard data is available.
         if (writeNoDataMessageIfNeeded(chartSheet, aggregatedRows, "No attendance chart data available.")) {
@@ -261,6 +261,8 @@ public class ChartGeneratorService {
         // Configure axes for a horizontal ranking chart.
         XDDFCategoryAxis categoryAxis = chart.createCategoryAxis(AxisPosition.LEFT);
         XDDFValueAxis valueAxis = HelperExcelCharts.createCountAxis(chart, AxisPosition.BOTTOM,"Number of Attendees");
+        categoryAxis.crossAxis(valueAxis);
+        valueAxis.crossAxis(categoryAxis);
 
         XDDFCategoryDataSource categories = HelperExcelCharts.categorySource(chartSheet,1, campaignCount ,SUPPORT_START_COLUMN);
         XDDFNumericalDataSource<Double> values = HelperExcelCharts.numericSource(chartSheet,1, campaignCount,SUPPORT_START_COLUMN + 1);
@@ -272,6 +274,9 @@ public class ChartGeneratorService {
 
         XDDFBarChartData.Series series = (XDDFBarChartData.Series) chartData.addSeries(categories, values);
         series.setTitle("Attendees", null);
+
+        // Add labels at the end of the horizontal bars
+        HelperExcelCharts.addOutsideEndValueLabelsToBar(series);
 
         chart.plot(chartData);
     }
