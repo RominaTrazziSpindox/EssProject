@@ -75,6 +75,9 @@ public final class HelperExcelCharts {
         chart.setTitleOverlay(false);
         chart.getOrAddLegend().setPosition(legendPosition);
 
+        // Allow the chart to keep using hidden support columns as data source
+        chart.setPlotOnlyVisibleCells(false);
+
         return chart;
     }
 

@@ -47,6 +47,8 @@ public class ChartGeneratorService {
     private static final int SECOND_CHART_TOP_ROW = 22;
     private static final int SECOND_CHART_BOTTOM_ROW = 41;
 
+    /* --- CREATING SHEETS --- */
+
     /**
      * Creates the attendance overview sheet and adds a horizontal bar chart
      * showing total attendees by campaign.
@@ -74,19 +76,17 @@ public class ChartGeneratorService {
         HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, "Campaign", "Attendees");
 
         int rowIndex = 1;
-        for (CampaignAggregatedDataDTO aggregatedRow : sortedRows) {
-                HelperExcelCharts.writeTextCell(chartSheet, rowIndex, SUPPORT_START_COLUMN, aggregatedRow.campaignDisplayName()
-            );
 
+        for (CampaignAggregatedDataDTO aggregatedRow : sortedRows) {
+
+            HelperExcelCharts.writeTextCell(chartSheet, rowIndex, SUPPORT_START_COLUMN, aggregatedRow.campaignDisplayName() );
             HelperExcelCharts.writeNumericCell(chartSheet, rowIndex,SUPPORT_START_COLUMN + 1, aggregatedRow.attendeeCount());
 
             rowIndex++;
         }
 
-        // Hide technical columns to keep the worksheet visually clean.
-        HelperExcelCharts.hideSupportColumns(chartSheet, SUPPORT_START_COLUMN, 2);
-
-        createAttendanceOverviewChart(chartSheet, sortedRows.size());
+        // Render the chart
+       createAttendanceOverviewChart(chartSheet, sortedRows.size());
     }
 
     /**
@@ -117,6 +117,7 @@ public class ChartGeneratorService {
 
         int rowIndex = 1;
 
+        // Create the rows
         for (CampaignAggregatedDataDTO aggregatedRow : sortedRows) {
 
             HelperExcelCharts.writeTextCell(chartSheet, rowIndex, SUPPORT_START_COLUMN, aggregatedRow.campaignDisplayName());
@@ -128,11 +129,12 @@ public class ChartGeneratorService {
             rowIndex++;
         }
 
-        HelperExcelCharts.hideSupportColumns(chartSheet, SUPPORT_START_COLUMN, 5);
-
-        // Render the absolute-count chart first, then the percentage chart below it.
+        // Render the absolute-count chart first, then the percentage chart below it
         createMainAttendeesVsCompanionsChart(chartSheet, sortedRows.size());
         createCompositionRateChart(chartSheet, sortedRows.size());
+
+        // Hide technical columns to keep the worksheet visually clean
+        HelperExcelCharts.hideSupportColumns(chartSheet, SUPPORT_START_COLUMN, 5);
     }
 
     /**
@@ -240,6 +242,9 @@ public class ChartGeneratorService {
 
         createDataCompletenessChart(chartSheet, aggregatedRows.size());
     }
+
+
+    /* --- CREATING CHARTS --- */
 
     /**
      * Creates the horizontal bar chart for the attendance overview sheet.
@@ -441,6 +446,9 @@ public class ChartGeneratorService {
 
         chart.plot(chartData);
     }
+
+
+    /* --- OTHERS FUNCTIONS --- */
 
     /**
      * Writes a fallback message and returns true when the dataset is empty.

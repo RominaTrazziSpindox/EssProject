@@ -33,6 +33,8 @@ public class CampaignExcelDashboardService {
     private final ExcelGeneratorService excelGeneratorService;
     private final ChartGeneratorService chartGeneratorService;
 
+
+
     public CampaignExcelDashboardService(ExcelGeneratorService excelGeneratorService, ChartGeneratorService chartGeneratorService) {
 
         this.excelGeneratorService = excelGeneratorService;
@@ -73,30 +75,6 @@ public class CampaignExcelDashboardService {
 
             log.info("Dashboard workbook generated successfully.");
         });
-    }
-
-    /**
-     * Generates the dashboard workbook and saves it under build/reports.
-     *
-     * @param aggregatedRows the aggregated campaign data used by the dashboard
-     * @return the saved file path
-     */
-    public Path saveDashboardWorkbookToDisk(List<CampaignAggregatedDataDTO> aggregatedRows) {
-        byte[] workbookBytes = generateDashboardWorkbook(aggregatedRows);
-
-        try {
-            Files.createDirectories(REPORTS_DIRECTORY);
-
-            Path outputPath = REPORTS_DIRECTORY.resolve("campaign-dashboard-" + LocalDateTime.now().format(FILE_TIMESTAMP_FORMAT) + ".xlsx");
-
-            Files.write(outputPath, workbookBytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-
-            log.info("Dashboard workbook saved to disk: {}", outputPath.toAbsolutePath());
-            return outputPath;
-
-        } catch (IOException exception) {
-            throw new IllegalStateException("Failed to save dashboard workbook to disk.", exception);
-        }
     }
 
     /**
