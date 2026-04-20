@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types';
+
 JsonText.propTypes = {
     data: PropTypes.oneOfType([
         PropTypes.object,

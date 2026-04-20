@@ -1,5 +1,6 @@
 import JsonText from './JsonText'; 
 import RateLimit from './RateLimit.jsx';
+import PropTypes from 'prop-types';
 
 PayloadPreview.propTypes = {
     data: PropTypes.oneOfType([
