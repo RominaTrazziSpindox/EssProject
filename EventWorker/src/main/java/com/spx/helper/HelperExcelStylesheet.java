@@ -1,7 +1,7 @@
 package com.spx.helper;
 
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.*;
 
 // Utility class containing shared Excel styling and sheet formatting helpers.
 public final class HelperExcelStylesheet {
@@ -163,20 +163,6 @@ public final class HelperExcelStylesheet {
     }
 
     /**
-     * Creates an empty placeholder sheet for future chart placement.
-     *
-     * @param workbook the target workbook
-     * @param sheetName the name of the sheet to create
-     */
-    public static void createPlaceholderSheet(XSSFWorkbook workbook, String sheetName) {
-        Sheet sheet = workbook.createSheet(sheetName);
-        applyDefaultSheetLayout(sheet);
-
-        Row row = sheet.createRow(0);
-        row.createCell(0).setCellValue("Chart placeholder");
-    }
-
-    /**
      * Returns an empty string when the provided value is null.
      *
      * @param value the source string
@@ -185,4 +171,5 @@ public final class HelperExcelStylesheet {
     public static String defaultString(String value) {
         return value == null ? "" : value;
     }
+
 }

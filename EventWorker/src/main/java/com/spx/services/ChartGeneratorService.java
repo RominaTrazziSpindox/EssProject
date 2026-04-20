@@ -3,19 +3,7 @@ package com.spx.services;
 import com.spx.dto.CampaignAggregatedDataDTO;
 import com.spx.helper.HelperExcelCharts;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.xddf.usermodel.chart.AxisPosition;
-import org.apache.poi.xddf.usermodel.chart.BarDirection;
-import org.apache.poi.xddf.usermodel.chart.BarGrouping;
-import org.apache.poi.xddf.usermodel.chart.ChartTypes;
-import org.apache.poi.xddf.usermodel.chart.LegendPosition;
-import org.apache.poi.xddf.usermodel.chart.MarkerStyle;
-import org.apache.poi.xddf.usermodel.chart.XDDFBarChartData;
-import org.apache.poi.xddf.usermodel.chart.XDDFCategoryAxis;
-import org.apache.poi.xddf.usermodel.chart.XDDFCategoryDataSource;
-import org.apache.poi.xddf.usermodel.chart.XDDFChartData;
-import org.apache.poi.xddf.usermodel.chart.XDDFLineChartData;
-import org.apache.poi.xddf.usermodel.chart.XDDFNumericalDataSource;
-import org.apache.poi.xddf.usermodel.chart.XDDFValueAxis;
+import org.apache.poi.xddf.usermodel.chart.*;
 import org.apache.poi.xssf.usermodel.XSSFChart;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -24,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * The type Chart generator service.
+ */
 /*
  * Service responsible for generating the dashboard chart sheets
  * It defines:
@@ -39,6 +30,8 @@ public class ChartGeneratorService {
     // Hidden support tables start from column U (index 20).
     private static final int SUPPORT_START_COLUMN = 20;
 
+    private static final int OVERALL_SUPPORT_START_COLUMN = SUPPORT_START_COLUMN + 3;
+
     // Shared chart anchors
     private static final int CHART_LEFT_COLUMN = 0;
     private static final int CHART_RIGHT_COLUMN = 12;
@@ -47,14 +40,23 @@ public class ChartGeneratorService {
     private static final int SECOND_CHART_TOP_ROW = 22;
     private static final int SECOND_CHART_BOTTOM_ROW = 45;
 
+    // Doughnut constants
+    private static final int DOUGHNUT_LEFT_COLUMN = 3;
+    private static final int DOUGHNUT_RIGHT_COLUMN = 11;
+
+    private static final int DOUGHNUT_CENTER_LEFT_COLUMN = 3;
+    private static final int DOUGHNUT_CENTER_RIGHT_COLUMN = 11;
+    private static final int DOUGHNUT_CENTER_TOP_ROW = SECOND_CHART_TOP_ROW + 7;
+    private static final int DOUGHNUT_CENTER_BOTTOM_ROW = SECOND_CHART_BOTTOM_ROW - 7;
+
+
     /* --- CREATING SHEETS --- */
 
     /**
      * Creates the attendance overview sheet and adds a horizontal bar chart
      * showing total attendees by campaign.
      *
-     *
-     * @param workbook the target workbook
+     * @param workbook       the target workbook
      * @param aggregatedRows the aggregated campaign rows
      */
     public void createAttendanceOverviewSheet(XSSFWorkbook workbook, List<CampaignAggregatedDataDTO> aggregatedRows) {
@@ -78,15 +80,39 @@ public class ChartGeneratorService {
         int rowIndex = 1;
 
         for (CampaignAggregatedDataDTO aggregatedRow : sortedRows) {
-
-            HelperExcelCharts.writeTextCell(chartSheet, rowIndex, SUPPORT_START_COLUMN, aggregatedRow.campaignDisplayName() );
-            HelperExcelCharts.writeNumericCell(chartSheet, rowIndex,SUPPORT_START_COLUMN + 1, aggregatedRow.attendeeCount());
+            HelperExcelCharts.writeTextCell(chartSheet, rowIndex, SUPPORT_START_COLUMN, aggregatedRow.campaignDisplayName());
+            HelperExcelCharts.writeNumericCell(chartSheet, rowIndex, SUPPORT_START_COLUMN + 1, aggregatedRow.attendeeCount());
 
             rowIndex++;
         }
 
+        // Support table for the overall doughnut chart
+        int totalMainAttendees = aggregatedRows
+                .stream()
+                .mapToInt(CampaignAggregatedDataDTO::mainAttendeeCount)
+                .sum();
+
+        int totalCompanions = aggregatedRows
+                .stream()
+                .mapToInt(CampaignAggregatedDataDTO::companionCount)
+                .sum();
+
+
+        int totalAttendees = totalMainAttendees + totalCompanions;
+
+        HelperExcelCharts.writeHeaders(chartSheet, OVERALL_SUPPORT_START_COLUMN, "Type", "Count");
+        HelperExcelCharts.writeTextCell(chartSheet, 1, OVERALL_SUPPORT_START_COLUMN, "Main Attendees");
+        HelperExcelCharts.writeNumericCell(chartSheet, 1, OVERALL_SUPPORT_START_COLUMN + 1, totalMainAttendees);
+
+        HelperExcelCharts.writeTextCell(chartSheet, 2, OVERALL_SUPPORT_START_COLUMN, "Companions");
+        HelperExcelCharts.writeNumericCell(chartSheet, 2, OVERALL_SUPPORT_START_COLUMN + 1, totalCompanions);
+
+
         // Render the chart
        createAttendanceOverviewChart(chartSheet, sortedRows.size());
+       createOverallCompositionChart(chartSheet, totalAttendees);
+
+        HelperExcelCharts.hideSupportColumns(chartSheet, SUPPORT_START_COLUMN, 5);
     }
 
     /**
@@ -94,15 +120,15 @@ public class ChartGeneratorService {
      * - clustered vertical columns for main attendees vs companions
      * - a line chart with markers for main attendee rate vs companion rate
      *
-     * @param workbook the target workbook
+     * @param workbook       the target workbook
      * @param aggregatedRows the aggregated campaign rows
      */
     public void createCompositionSheet(XSSFWorkbook workbook, List<CampaignAggregatedDataDTO> aggregatedRows) {
 
         log.info("Building Composition chart sheet.");
 
-        // Create a new chartsheet
-        XSSFSheet chartSheet = HelperExcelCharts.createChartSheet(workbook, "Composition");
+        // Create a new chart sheet
+        XSSFSheet chartSheet = HelperExcelCharts.createChartSheet(workbook, "Attendee Composition by Campaign");
 
         // Stop early when no dashboard data is available.
         if (writeNoDataMessageIfNeeded(chartSheet, aggregatedRows, "No composition chart data available.")) {
@@ -142,7 +168,7 @@ public class ChartGeneratorService {
      * - a line chart with markers for average age by campaign
      * - a doughnut chart for overall age distribution
      *
-     * @param workbook the target workbook
+     * @param workbook       the target workbook
      * @param aggregatedRows the aggregated campaign rows
      */
     public void createAgeAnalysisSheet(XSSFWorkbook workbook, List<CampaignAggregatedDataDTO> aggregatedRows) {
@@ -213,7 +239,7 @@ public class ChartGeneratorService {
      * Creates the data completeness sheet and adds a doughnut chart
      * showing data completeness by campaign.
      *
-     * @param workbook the target workbook
+     * @param workbook       the target workbook
      * @param aggregatedRows the aggregated campaign rows
      */
     public void createDataCompletenessSheet(XSSFWorkbook workbook, List<CampaignAggregatedDataDTO> aggregatedRows) {
@@ -246,6 +272,8 @@ public class ChartGeneratorService {
 
     /* --- CREATING CHARTS --- */
 
+    // FIRST SHEET (after Summary sheet)
+
     /**
      * Creates the horizontal bar chart for the attendance overview sheet.
      *
@@ -254,8 +282,8 @@ public class ChartGeneratorService {
      */
     private void createAttendanceOverviewChart(XSSFSheet chartSheet, int campaignCount) {
 
-        XSSFChart chart = HelperExcelCharts.createChart(chartSheet, CHART_LEFT_COLUMN, FIRST_CHART_TOP_ROW, CHART_RIGHT_COLUMN, SECOND_CHART_BOTTOM_ROW,
-                "Total Attendees by Campaign", LegendPosition.BOTTOM
+        XSSFChart chart = HelperExcelCharts.createChart(chartSheet, CHART_LEFT_COLUMN, FIRST_CHART_TOP_ROW, CHART_RIGHT_COLUMN, FIRST_CHART_BOTTOM_ROW,
+                "Total Attendees by Campaign", LegendPosition.RIGHT
         );
 
         // Configure axes for a horizontal ranking chart.
@@ -276,10 +304,47 @@ public class ChartGeneratorService {
         series.setTitle("Attendees", null);
 
         // Add labels at the end of the horizontal bars
-        HelperExcelCharts.addOutsideEndValueLabelsToBar(series);
+        HelperExcelCharts.addOutsideValueLabelsToBar(series);
 
         chart.plot(chartData);
     }
+
+    /**
+     * Creates the doughnut chart for the overall composition sheet.
+     *
+     * @param chartSheet the target chart sheet
+     * @param totalAttendees the number of total of attendees' campaigns
+     */
+    private void createOverallCompositionChart(XSSFSheet chartSheet, int totalAttendees) {
+
+        XSSFChart chart = HelperExcelCharts.createChart(chartSheet, DOUGHNUT_LEFT_COLUMN, SECOND_CHART_TOP_ROW, DOUGHNUT_RIGHT_COLUMN,
+                                                        SECOND_CHART_BOTTOM_ROW,"Overall Attendee Composition", LegendPosition.RIGHT
+        );
+
+        XDDFCategoryDataSource categories = HelperExcelCharts.categorySource( chartSheet, 1,  2,  OVERALL_SUPPORT_START_COLUMN);
+
+        XDDFNumericalDataSource<Double> values = HelperExcelCharts.numericSource( chartSheet,  1,2,OVERALL_SUPPORT_START_COLUMN + 1);
+
+        XDDFDoughnutChartData chartData = (XDDFDoughnutChartData) chart.createData(ChartTypes.DOUGHNUT, null,null);
+
+        chartData.setVaryColors(true);
+        chartData.setHoleSize(65);
+
+        XDDFChartData.Series series = chartData.addSeries(categories, values);
+        series.setTitle("Overall Composition", null);
+
+        chart.plot(chartData);
+
+        // Percentage labels on the slices
+        HelperExcelCharts.addPercentageLabelsToDoughnut(chart);
+
+        // Number in the center
+        HelperExcelCharts.addCenteredChartText(chartSheet, DOUGHNUT_CENTER_LEFT_COLUMN, DOUGHNUT_CENTER_TOP_ROW, DOUGHNUT_CENTER_RIGHT_COLUMN,
+                                                DOUGHNUT_CENTER_BOTTOM_ROW, "Total Attendees", String.valueOf(totalAttendees)
+        );
+    }
+
+    // SECOND SHEET
 
     /**
      * Creates the clustered vertical column chart for main attendees vs companions.
@@ -289,93 +354,83 @@ public class ChartGeneratorService {
      */
     private void createMainAttendeesVsCompanionsChart(XSSFSheet chartSheet, int campaignCount) {
 
-        XSSFChart chart = HelperExcelCharts.createChart(
-                chartSheet, CHART_LEFT_COLUMN,
-
-                FIRST_CHART_TOP_ROW,
-                CHART_RIGHT_COLUMN,
-                FIRST_CHART_BOTTOM_ROW,
-                "Main Attendees vs Companions by Campaign",
-                LegendPosition.BOTTOM
+        XSSFChart chart = HelperExcelCharts.createChart(chartSheet, CHART_LEFT_COLUMN, FIRST_CHART_TOP_ROW, CHART_RIGHT_COLUMN, FIRST_CHART_BOTTOM_ROW,
+                "Main Attendees vs Companions by Campaign", LegendPosition.BOTTOM
         );
 
         XDDFCategoryAxis categoryAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        XDDFValueAxis valueAxis = HelperExcelCharts.createCountAxis(
-                chart,
-                AxisPosition.LEFT,
-                "Number of Attendees"
-        );
+        XDDFValueAxis valueAxis = HelperExcelCharts.createCountAxis(chart, AxisPosition.LEFT, "Number of Attendees");
 
-        XDDFCategoryDataSource categories = HelperExcelCharts.categorySource(
-                chartSheet,
-                1,
-                campaignCount,
-                SUPPORT_START_COLUMN
-        );
+        XDDFCategoryDataSource categories = HelperExcelCharts.categorySource( chartSheet, 1,campaignCount, SUPPORT_START_COLUMN);
 
-        XDDFNumericalDataSource<Double> mainValues = HelperExcelCharts.numericSource(
-                chartSheet,
-                1,
-                campaignCount,
-                SUPPORT_START_COLUMN + 1
-        );
-
-        XDDFNumericalDataSource<Double> companionValues = HelperExcelCharts.numericSource(
-                chartSheet,
-                1,
-                campaignCount,
-                SUPPORT_START_COLUMN + 2
-        );
-
-        XDDFBarChartData chartData = (XDDFBarChartData) chart.createData(
-                ChartTypes.BAR,
-                categoryAxis,
-                valueAxis
-        );
+        XDDFNumericalDataSource<Double> mainValues = HelperExcelCharts.numericSource(chartSheet,1, campaignCount,SUPPORT_START_COLUMN + 1);
+        XDDFNumericalDataSource<Double> companionValues = HelperExcelCharts.numericSource(chartSheet, 1,  campaignCount,  SUPPORT_START_COLUMN + 2);
+        XDDFBarChartData chartData = (XDDFBarChartData) chart.createData(ChartTypes.BAR,categoryAxis,valueAxis );
 
         chartData.setBarDirection(BarDirection.COL);
         chartData.setBarGrouping(BarGrouping.CLUSTERED);
         chartData.setGapWidth(45);
 
-        XDDFBarChartData.Series mainSeries =
-                (XDDFBarChartData.Series) chartData.addSeries(categories, mainValues);
+        XDDFBarChartData.Series mainSeries =  (XDDFBarChartData.Series) chartData.addSeries(categories, mainValues);
         mainSeries.setTitle("Main Attendees", null);
 
-        XDDFBarChartData.Series companionSeries =
-                (XDDFBarChartData.Series) chartData.addSeries(categories, companionValues);
+        XDDFBarChartData.Series companionSeries =   (XDDFBarChartData.Series) chartData.addSeries(categories, companionValues);
         companionSeries.setTitle("Companions", null);
+
+        // Add value labels above the vertical columns
+        HelperExcelCharts.addOutsideValueLabelsToBar(mainSeries);
+        HelperExcelCharts.addOutsideValueLabelsToBar(companionSeries);
 
         chart.plot(chartData);
     }
 
     /**
-     * Creates the line chart with markers for main attendee rate vs companion rate.
+     * Creates the 100% stacked horizontal bar chart for main attendees vs companions by campaign.
      *
      * @param chartSheet the target chart sheet
      * @param campaignCount the number of campaigns in the support table
      */
     private void createCompositionRateChart(XSSFSheet chartSheet, int campaignCount) {
 
-        XSSFChart chart = HelperExcelCharts.createChart(chartSheet, CHART_LEFT_COLUMN, SECOND_CHART_TOP_ROW, CHART_RIGHT_COLUMN, SECOND_CHART_BOTTOM_ROW,
-                                                  "Main Attendee Rate % vs Companion Rate % by Campaign", LegendPosition.BOTTOM);
+        XSSFChart chart = HelperExcelCharts.createChart(chartSheet, CHART_LEFT_COLUMN, SECOND_CHART_TOP_ROW,
+                                                        CHART_RIGHT_COLUMN, SECOND_CHART_BOTTOM_ROW,
+                                                    "Main vs Companion Share by Campaign (%)", LegendPosition.RIGHT
+        );
 
-        XDDFCategoryAxis categoryAxis = chart.createCategoryAxis(AxisPosition.BOTTOM);
-        XDDFValueAxis valueAxis = HelperExcelCharts.createValueAxis(chart, AxisPosition.LEFT, "Rate (%)",0d,100d,"0.0");
+        // Horizontal composition chart: campaigns on the left, percentage share on the bottom.
+        XDDFCategoryAxis categoryAxis = chart.createCategoryAxis(AxisPosition.LEFT);
+        XDDFValueAxis valueAxis = HelperExcelCharts.createValueAxis(chart, AxisPosition.BOTTOM,"Share (%)",
+                                                            0d,100d, "0%"
+        );
 
-        XDDFCategoryDataSource categories = HelperExcelCharts.categorySource(chartSheet,1,campaignCount, SUPPORT_START_COLUMN);
-        XDDFNumericalDataSource<Double> mainRateValues = HelperExcelCharts.numericSource(chartSheet,1, campaignCount, SUPPORT_START_COLUMN + 3);
-        XDDFNumericalDataSource<Double> companionRateValues = HelperExcelCharts.numericSource(chartSheet,1, campaignCount,SUPPORT_START_COLUMN + 4 );
+        categoryAxis.crossAxis(valueAxis);
+        valueAxis.crossAxis(categoryAxis);
 
-        XDDFLineChartData chartData = (XDDFLineChartData) chart.createData(ChartTypes.LINE, categoryAxis, valueAxis);
-        XDDFLineChartData.Series mainRateSeries = (XDDFLineChartData.Series) chartData.addSeries(categories, mainRateValues);
+        XDDFCategoryDataSource categories = HelperExcelCharts.categorySource(chartSheet, 1, campaignCount, SUPPORT_START_COLUMN);
 
-        HelperExcelCharts.configureLineSeries(mainRateSeries, "Main Attendee Rate (%)", MarkerStyle.CIRCLE);
-        XDDFLineChartData.Series companionRateSeries = (XDDFLineChartData.Series) chartData.addSeries(categories, companionRateValues);
+        XDDFNumericalDataSource<Double> mainRateValues = HelperExcelCharts.numericSource(chartSheet,1, campaignCount,SUPPORT_START_COLUMN + 3);
 
-        HelperExcelCharts.configureLineSeries(companionRateSeries,"Companion Rate (%)", MarkerStyle.DIAMOND);
+        XDDFNumericalDataSource<Double> companionRateValues = HelperExcelCharts.numericSource(chartSheet,1,campaignCount,SUPPORT_START_COLUMN + 4);
+
+        XDDFBarChartData chartData = (XDDFBarChartData) chart.createData(ChartTypes. BAR, categoryAxis, valueAxis);
+
+        chartData.setBarDirection(BarDirection.BAR);
+        chartData.setBarGrouping(BarGrouping.STACKED);
+        chartData.setOverlap((byte) 100);
+        chartData.setGapWidth(45);
+
+        XDDFBarChartData.Series mainRateSeries = (XDDFBarChartData.Series) chartData.addSeries(categories, mainRateValues);
+        mainRateSeries.setTitle("Main Attendees", null);
+
+        XDDFBarChartData.Series companionRateSeries = (XDDFBarChartData.Series) chartData.addSeries(categories, companionRateValues);
+        companionRateSeries.setTitle("Companions", null);
 
         chart.plot(chartData);
+
+        HelperExcelCharts.addPercentageLabelsToStackedBar(chart);
     }
+
+    // THIRD SHEET
 
     /**
      * Creates the line chart with markers for average age by campaign.
@@ -431,6 +486,8 @@ public class ChartGeneratorService {
 
         chart.plot(chartData);
     }
+
+    // FOURTH SHEET
 
     /**
      * Creates the doughnut chart for data completeness by campaign.

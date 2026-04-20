@@ -3,14 +3,8 @@ package com.spx.helper;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xddf.usermodel.chart.*;
-import org.apache.poi.xssf.usermodel.XSSFChart;
-import org.apache.poi.xssf.usermodel.XSSFClientAnchor;
-import org.apache.poi.xssf.usermodel.XSSFDrawing;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openxmlformats.schemas.drawingml.x2006.chart.CTBarSer;
-import org.openxmlformats.schemas.drawingml.x2006.chart.CTDLbls;
-import org.openxmlformats.schemas.drawingml.x2006.chart.STDLblPos;
+import org.apache.poi.xssf.usermodel.*;
+import org.openxmlformats.schemas.drawingml.x2006.chart.*;
 
 import java.lang.reflect.Field;
 
@@ -122,19 +116,6 @@ public final class HelperExcelCharts {
         return valueAxis;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * Creates a category data source from the given sheet range.
      *
@@ -181,7 +162,8 @@ public final class HelperExcelCharts {
         series.setMarkerSize((short) 6);
     }
 
-    public static void addOutsideEndValueLabelsToBar(XDDFBarChartData.Series series) {
+    /** Adds labels outside the bars and the donoughts */
+    public static void addOutsideValueLabelsToBar(XDDFBarChartData.Series series) {
         try {
             Field seriesField = XDDFBarChartData.Series.class.getDeclaredField("series");
             seriesField.setAccessible(true);
@@ -206,6 +188,95 @@ public final class HelperExcelCharts {
         } catch (ReflectiveOperationException exception) {
             throw new IllegalStateException("Unable to configure bar chart data labels.", exception);
         }
+    }
+
+    public static void addPercentageLabelsToDoughnut(XSSFChart chart) {
+
+        try {
+            Field seriesField = XDDFDoughnutChartData.Series.class.getDeclaredField("series");
+            seriesField.setAccessible(true);
+
+            CTPieSer ctPieSer = chart
+                    .getCTChart()
+                    .getPlotArea()
+                    .getDoughnutChartArray(0)
+                    .getSerArray(0);
+
+            if (ctPieSer.isSetDLbls()) {
+                ctPieSer.unsetDLbls();
+            }
+
+            CTDLbls dataLabels = ctPieSer.addNewDLbls();
+
+            dataLabels.addNewShowPercent().setVal(true);
+            dataLabels.addNewShowVal().setVal(false);
+            dataLabels.addNewShowCatName().setVal(false);
+            dataLabels.addNewShowSerName().setVal(false);
+            dataLabels.addNewShowLegendKey().setVal(false);
+
+
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Unable to configure doughnut chart data labels.", exception);
+        }
+    }
+
+    public static void addPercentageLabelsToStackedBar(XSSFChart chart) {
+
+        if (chart.getCTChart().getPlotArea().sizeOfBarChartArray() == 0) {
+            throw new IllegalStateException("No bar chart found in plot area.");
+        }
+
+        CTBarChart ctBarChart = chart.getCTChart().getPlotArea().getBarChartArray(0);
+
+        for (CTBarSer ctBarSer : ctBarChart.getSerList()) {
+
+            if (ctBarSer.isSetDLbls()) {
+                ctBarSer.unsetDLbls();
+            }
+
+            CTDLbls dataLabels = ctBarSer.addNewDLbls();
+            dataLabels.addNewDLblPos().setVal(STDLblPos.CTR);
+
+            dataLabels.addNewShowVal().setVal(true);
+            dataLabels.addNewShowPercent().setVal(false);
+            dataLabels.addNewShowCatName().setVal(false);
+            dataLabels.addNewShowSerName().setVal(false);
+            dataLabels.addNewShowLegendKey().setVal(false);
+            dataLabels.addNewShowLeaderLines().setVal(false);
+
+            // Optional but recommended: force percentage number format for labels
+            if (!dataLabels.isSetNumFmt()) {
+                dataLabels.addNewNumFmt();
+            }
+            dataLabels.getNumFmt().setFormatCode("0\\%");
+            dataLabels.getNumFmt().setSourceLinked(false);
+        }
+    }
+    /** Add the centered number to the donought */
+    public static void addCenteredChartText(XSSFSheet sheet, int leftColumn, int topRow, int rightColumn, int bottomRow, String firstLine, String secondLine) {
+
+        XSSFDrawing drawing = sheet.createDrawingPatriarch();
+
+        XSSFClientAnchor anchor = drawing.createAnchor( 0, 0, 0, 0, leftColumn, topRow, rightColumn, bottomRow);
+
+        XSSFTextBox textBox = drawing.createTextbox(anchor);
+        textBox.setNoFill(true);
+
+        XSSFTextParagraph paragraph1 = textBox.addNewTextParagraph();
+        paragraph1.setTextAlign(TextAlign.CENTER);
+
+        XSSFTextRun run1 = paragraph1.addNewTextRun();
+        run1.setText(firstLine);
+        run1.setBold(true);
+        run1.setFontSize(11.0);
+
+        XSSFTextParagraph paragraph2 = textBox.addNewTextParagraph();
+        paragraph2.setTextAlign(TextAlign.CENTER);
+
+        XSSFTextRun run2 = paragraph2.addNewTextRun();
+        run2.setText(secondLine);
+        run2.setBold(true);
+        run2.setFontSize(18.0);
     }
 
     /**
@@ -259,7 +330,7 @@ public final class HelperExcelCharts {
         Row row = sheet.getRow(rowIndex) == null ? sheet.createRow(rowIndex) : sheet.getRow(rowIndex);
         row.createCell(columnIndex).setCellValue(value == null ? 0d : value.doubleValue());
     }
-
-
-
 }
+
+
+
