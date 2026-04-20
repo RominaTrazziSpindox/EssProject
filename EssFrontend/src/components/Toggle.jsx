@@ -1,4 +1,13 @@
-function Toggle({ id, checked, onChange, disabled }) {
+import PropTypes from "prop-types";
+
+Toggle.propTypes = {
+    id: PropTypes.string.isRequired,
+    checked: PropTypes.bool.isRequired,
+    onChange: PropTypes.func.isRequired,
+    disabled: PropTypes.bool,
+};
+
+function Toggle({id, checked, onChange, disabled }) {
     return (
         <>
             <label htmlFor={id}>Is companion</label>
@@ -6,5 +15,7 @@ function Toggle({ id, checked, onChange, disabled }) {
         </>
     );
 }
+
+
 
 export default Toggle;

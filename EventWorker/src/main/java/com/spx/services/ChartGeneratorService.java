@@ -27,6 +27,12 @@ import java.util.List;
 @Slf4j
 public class ChartGeneratorService {
 
+    // Constants
+    private static final String COMPANIONS = "Companions";
+    private static final String MAIN_ATTENDEE = "Main_Attendee";
+    private static final String CAMPAIGN = "Campaign";
+    private static final String AVERAGE_AGE = "Average_Age";
+
     // Hidden support tables start from column U (index 20).
     private static final int SUPPORT_START_COLUMN = 20;
 
@@ -75,7 +81,7 @@ public class ChartGeneratorService {
         List<CampaignAggregatedDataDTO> sortedRows = sortByAttendeeCountDesc(aggregatedRows);
 
         // Write the hidden support table used as the chart source.
-        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, "Campaign", "Attendees");
+        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, CAMPAIGN, "Attendees");
 
         int rowIndex = 1;
 
@@ -101,10 +107,10 @@ public class ChartGeneratorService {
         int totalAttendees = totalMainAttendees + totalCompanions;
 
         HelperExcelCharts.writeHeaders(chartSheet, OVERALL_SUPPORT_START_COLUMN, "Type", "Count");
-        HelperExcelCharts.writeTextCell(chartSheet, 1, OVERALL_SUPPORT_START_COLUMN, "Main Attendees");
+        HelperExcelCharts.writeTextCell(chartSheet, 1, OVERALL_SUPPORT_START_COLUMN, MAIN_ATTENDEE);
         HelperExcelCharts.writeNumericCell(chartSheet, 1, OVERALL_SUPPORT_START_COLUMN + 1, totalMainAttendees);
 
-        HelperExcelCharts.writeTextCell(chartSheet, 2, OVERALL_SUPPORT_START_COLUMN, "Companions");
+        HelperExcelCharts.writeTextCell(chartSheet, 2, OVERALL_SUPPORT_START_COLUMN, COMPANIONS);
         HelperExcelCharts.writeNumericCell(chartSheet, 2, OVERALL_SUPPORT_START_COLUMN + 1, totalCompanions);
 
 
@@ -139,7 +145,7 @@ public class ChartGeneratorService {
         List<CampaignAggregatedDataDTO> sortedRows = sortByAttendeeCountDesc(aggregatedRows);
 
         // Write the support table for both charts in this worksheet.
-        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, "Campaign", "Main Attendees", "Companions", "Main Attendee Rate", "Companion Rate");
+        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, CAMPAIGN, MAIN_ATTENDEE, COMPANIONS, "Main Attendee Rate", "Companion Rate");
 
         int rowIndex = 1;
 
@@ -183,7 +189,7 @@ public class ChartGeneratorService {
         }
 
         // Write the support table for average age by campaign.
-        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, "Campaign", "Average Age");
+        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, CAMPAIGN, AVERAGE_AGE);
 
         int rowIndex = 1;
 
@@ -254,7 +260,7 @@ public class ChartGeneratorService {
         }
 
         // Write the support table used by the doughnut chart.
-        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, "Campaign", "Completeness");
+        HelperExcelCharts.writeHeaders(chartSheet, SUPPORT_START_COLUMN, CAMPAIGN, "Completeness");
 
         int rowIndex = 1;
         for (CampaignAggregatedDataDTO aggregatedRow : aggregatedRows) {
@@ -372,10 +378,10 @@ public class ChartGeneratorService {
         chartData.setGapWidth(45);
 
         XDDFBarChartData.Series mainSeries =  (XDDFBarChartData.Series) chartData.addSeries(categories, mainValues);
-        mainSeries.setTitle("Main Attendees", null);
+        mainSeries.setTitle(MAIN_ATTENDEE, null);
 
         XDDFBarChartData.Series companionSeries =   (XDDFBarChartData.Series) chartData.addSeries(categories, companionValues);
-        companionSeries.setTitle("Companions", null);
+        companionSeries.setTitle(COMPANIONS, null);
 
         // Add value labels above the vertical columns
         HelperExcelCharts.addOutsideValueLabelsToBar(mainSeries);
@@ -423,7 +429,7 @@ public class ChartGeneratorService {
         mainRateSeries.setTitle("Main Attendees", null);
 
         XDDFBarChartData.Series companionRateSeries = (XDDFBarChartData.Series) chartData.addSeries(categories, companionRateValues);
-        companionRateSeries.setTitle("Companions", null);
+        companionRateSeries.setTitle(COMPANIONS, null);
 
         chart.plot(chartData);
 

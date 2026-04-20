@@ -7,6 +7,9 @@ plugins {
 group = "com.spx"
 version = "0.0.1-SNAPSHOT"
 
+val testContainerVersion = "1.19.7"
+val bucket4jVersion = "8.17.0"
+
 repositories {
     mavenCentral()
     maven { url = uri("https://repo.spring.io/snapshot") }
@@ -30,13 +33,13 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
 
     // --- Bucket4j ---
-    implementation("com.bucket4j:bucket4j_jdk17-core:8.17.0")
+    implementation("com.bucket4j:bucket4j_jdk17-core:$bucket4jVersion")
 
     // --- Testing ---
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 
-    testImplementation(platform("org.testcontainers:testcontainers-bom:1.19.7"))
+    testImplementation(platform("org.testcontainers:testcontainers-bom:$testContainerVersion"))
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:rabbitmq")
     testImplementation("org.testcontainers:postgresql")

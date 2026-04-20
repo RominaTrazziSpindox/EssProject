@@ -1,4 +1,17 @@
+import PropTypes from 'prop-types';
+
 import Input from "./Input";
+
+CampaignContent.propTypes = {
+    formData: PropTypes.object.isRequired,
+    onChange: PropTypes.func.isRequired,
+    errors: PropTypes.object,
+    isSubmitting: PropTypes.bool.isRequired,
+};
+
+CampaignContent.defaultProps = {
+    errors: {},
+};
 
 function CampaignContent({ formData, onChange, errors, isSubmitting }) {
     return (

@@ -1,6 +1,34 @@
 import JsonText from './JsonText'; 
 import RateLimit from './RateLimit.jsx';
 
+PayloadPreview.propTypes = {
+    data: PropTypes.oneOfType([
+        PropTypes.object,
+        PropTypes.array,
+        PropTypes.string,
+    ]).isRequired,
+    rateLimitInfo: PropTypes.shape({
+        requestCount: PropTypes.number,
+        limit: PropTypes.number,
+        retryAfter: PropTypes.oneOfType([
+            PropTypes.number,
+            PropTypes.string,
+            PropTypes.instanceOf(Date),
+        ]),
+        isRateLimited: PropTypes.bool,
+        resetAt: PropTypes.oneOfType([
+            PropTypes.number,
+            PropTypes.string,
+            PropTypes.instanceOf(Date),
+        ]),
+    }),
+};
+
+PayloadPreview.defaultProps = {
+    rateLimitInfo: null,
+};
+
+
 function PayloadPreview({ data, rateLimitInfo  }) {
   return (
     <div>

@@ -167,7 +167,6 @@ public final class HelperExcelCharts {
         try {
             Field seriesField = XDDFBarChartData.Series.class.getDeclaredField("series");
             seriesField.setAccessible(true);
-
             CTBarSer ctBarSer = (CTBarSer) seriesField.get(series);
 
             if (ctBarSer.isSetDLbls()) {
@@ -192,32 +191,24 @@ public final class HelperExcelCharts {
 
     public static void addPercentageLabelsToDoughnut(XSSFChart chart) {
 
-        try {
-            Field seriesField = XDDFDoughnutChartData.Series.class.getDeclaredField("series");
-            seriesField.setAccessible(true);
+        CTPieSer ctPieSer = chart
+                .getCTChart()
+                .getPlotArea()
+                .getDoughnutChartArray(0)
+                .getSerArray(0);
 
-            CTPieSer ctPieSer = chart
-                    .getCTChart()
-                    .getPlotArea()
-                    .getDoughnutChartArray(0)
-                    .getSerArray(0);
-
-            if (ctPieSer.isSetDLbls()) {
-                ctPieSer.unsetDLbls();
-            }
-
-            CTDLbls dataLabels = ctPieSer.addNewDLbls();
-
-            dataLabels.addNewShowPercent().setVal(true);
-            dataLabels.addNewShowVal().setVal(false);
-            dataLabels.addNewShowCatName().setVal(true);
-            dataLabels.addNewShowSerName().setVal(false);
-            dataLabels.addNewShowLegendKey().setVal(false);
-
-
-        } catch (ReflectiveOperationException exception) {
-            throw new IllegalStateException("Unable to configure doughnut chart data labels.", exception);
+        if (ctPieSer.isSetDLbls()) {
+            ctPieSer.unsetDLbls();
         }
+
+        CTDLbls dataLabels = ctPieSer.addNewDLbls();
+
+        dataLabels.addNewShowPercent().setVal(true);
+        dataLabels.addNewShowVal().setVal(false);
+        dataLabels.addNewShowCatName().setVal(true);
+        dataLabels.addNewShowSerName().setVal(false);
+        dataLabels.addNewShowLegendKey().setVal(false);
+
     }
 
     public static void addPercentageLabelsToStackedBar(XSSFChart chart) {

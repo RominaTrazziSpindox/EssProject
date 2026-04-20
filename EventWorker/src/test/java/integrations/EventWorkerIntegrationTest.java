@@ -125,7 +125,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
     @Test
     void shouldSendMessageToDLQOnFailure() {
 
-        CampaignEventDTO DLQCampaignDTO = TestDataFactory.builderDLQCampaignDTO();
+        CampaignEventDTO dlqCampaignDTO = TestDataFactory.builderDLQCampaignDTO();
 
         doThrow(new RuntimeException("Forced consumer failure"))
                 .when(campaignProcessService)
@@ -133,7 +133,7 @@ class EventWorkerIntegrationTest extends AbstractIntegrationTest {
                         "C-DLQ".equals(dto.getCampaignId()) && "SC-DLQ".equals(dto.getSubCampaignId())
                 ));
 
-        publish(DLQCampaignDTO);
+        publish(dlqCampaignDTO);
 
         await().atMost(5, SECONDS).untilAsserted(() -> {
 

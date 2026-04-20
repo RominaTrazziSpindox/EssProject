@@ -8,6 +8,38 @@ import { TEST_DELAY_MS, delay, buildTestPayload } from '../helpers/HelperTestPay
 import { readRateLimitHeaders } from '../helpers/HelperRateLimit';
 import { buildLoadingFeedback, buildValidationFeedback, buildSuccessFeedback, buildBadRequestFeedback, buildUnauthorizedFeedback, buildRateLimitedFeedback, buildNetworkFeedback, buildUnexpectedFeedback, buildTestSuccessFeedback, buildTestBadRequestFeedback, buildTestUnauthorizedFeedback, buildTestGenericFailureFeedback } from '../helpers/HelperFeedback';
 
+
+import PropTypes from 'prop-types';
+
+FormCampaign.propTypes = {
+    formData: PropTypes.object.isRequired,
+    setFormData: PropTypes.func.isRequired,
+    createInitialForm: PropTypes.func.isRequired,
+    createEmptyAttendee: PropTypes.func.isRequired,
+    buildCampaignPayload: PropTypes.func.isRequired,
+    rateLimitInfo: PropTypes.shape({
+        requestCount: PropTypes.number,
+        limit: PropTypes.number,
+        retryAfter: PropTypes.oneOfType([
+            PropTypes.number,
+            PropTypes.string,
+            PropTypes.instanceOf(Date),
+        ]),
+        isRateLimited: PropTypes.bool,
+        resetAt: PropTypes.oneOfType([
+            PropTypes.number,
+            PropTypes.string,
+            PropTypes.instanceOf(Date),
+        ]),
+    }),
+    setRateLimitInfo: PropTypes.func.isRequired,
+};
+
+FormCampaign.defaultProps = {
+    rateLimitInfo: null,
+};
+
+
 function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAttendee, buildCampaignPayload, rateLimitInfo, setRateLimitInfo }) {
  
   /* UI STATE */

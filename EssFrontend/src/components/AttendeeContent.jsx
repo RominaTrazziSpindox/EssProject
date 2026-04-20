@@ -1,6 +1,19 @@
 import Input from './Input';
 import Toggle from './Toggle';
 
+import PropTypes from 'prop-types';
+
+AttendeeContent.propTypes = {
+    attendee: PropTypes.object.isRequired,
+    onFieldChange: PropTypes.func.isRequired,
+    isSubmitting: PropTypes.bool.isRequired,
+    errors: PropTypes.object,
+};
+
+AttendeeContent.defaultProps = {
+    errors: {},
+};
+
 function AttendeeContent({ attendee, onFieldChange, isSubmitting, errors }) {
     
     // Helper function to handle input changes 

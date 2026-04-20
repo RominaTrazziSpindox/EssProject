@@ -15,6 +15,7 @@ repositories {
 val mapstructVersion = "1.6.0"
 val lombokMapstructBindingVersion = "0.2.0"
 val poiVersion = "5.5.1"
+val starterMailVersion = "4.0.5"
 
 dependencies {
 
@@ -23,7 +24,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-amqp")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    implementation("org.springframework.boot:spring-boot-starter-mail:4.0.5")
+    implementation("org.springframework.boot:spring-boot-starter-mail:$starterMailVersion")
 
     // --- Mapping ---
     implementation("org.mapstruct:mapstruct:$mapstructVersion")

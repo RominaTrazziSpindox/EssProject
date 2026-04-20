@@ -25,16 +25,10 @@ import java.util.List;
 public class CampaignExcelDashboardService {
 
     // Constants
-
-    // For saving file on disk
-    private static final Path REPORTS_DIRECTORY = Path.of("build", "reports");
-    private static final DateTimeFormatter FILE_TIMESTAMP_FORMAT = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss");
-
     private final ExcelGeneratorService excelGeneratorService;
     private final ChartGeneratorService chartGeneratorService;
 
-
-
+    // Constructor
     public CampaignExcelDashboardService(ExcelGeneratorService excelGeneratorService, ChartGeneratorService chartGeneratorService) {
 
         this.excelGeneratorService = excelGeneratorService;
