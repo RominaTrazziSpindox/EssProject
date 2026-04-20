@@ -475,7 +475,7 @@ public class ChartGeneratorService {
     private void createOverallAgeDistributionChart(XSSFSheet chartSheet, int ageDistributionStartColumn) {
 
         XSSFChart chart = HelperExcelCharts.createChart(chartSheet, CHART_LEFT_COLUMN,SECOND_CHART_TOP_ROW, CHART_RIGHT_COLUMN,
-                                                        SECOND_CHART_BOTTOM_ROW,"Overall Age Distribution", LegendPosition.RIGHT
+                                                        SECOND_CHART_BOTTOM_ROW,"Overall Age Distribution", LegendPosition.BOTTOM
         );
 
         XDDFCategoryDataSource categories = HelperExcelCharts.categorySource(chartSheet,1,4, ageDistributionStartColumn);
@@ -485,6 +485,8 @@ public class ChartGeneratorService {
         series.setTitle("Age Distribution", null);
 
         chart.plot(chartData);
+
+        HelperExcelCharts.addPercentageLabelsToDoughnut(chart);
     }
 
     // FOURTH SHEET
@@ -507,6 +509,8 @@ public class ChartGeneratorService {
         series.setTitle("Completeness (%)", null);
 
         chart.plot(chartData);
+
+        HelperExcelCharts.addPercentageLabelsToDoughnut(chart);
     }
 
 

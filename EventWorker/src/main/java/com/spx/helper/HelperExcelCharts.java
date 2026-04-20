@@ -210,7 +210,7 @@ public final class HelperExcelCharts {
 
             dataLabels.addNewShowPercent().setVal(true);
             dataLabels.addNewShowVal().setVal(false);
-            dataLabels.addNewShowCatName().setVal(false);
+            dataLabels.addNewShowCatName().setVal(true);
             dataLabels.addNewShowSerName().setVal(false);
             dataLabels.addNewShowLegendKey().setVal(false);
 
@@ -252,6 +252,7 @@ public final class HelperExcelCharts {
             dataLabels.getNumFmt().setSourceLinked(false);
         }
     }
+
     /** Add the centered number to the donought */
     public static void addCenteredChartText(XSSFSheet sheet, int leftColumn, int topRow, int rightColumn, int bottomRow, String firstLine, String secondLine) {
 
