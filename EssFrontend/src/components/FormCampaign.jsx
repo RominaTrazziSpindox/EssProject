@@ -56,7 +56,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
   // Stores the feedback message shown to the user after validation or submission
   const [feedback, setFeedback] = useState({ type: '', message: '' });
 
-  // Stores the countdown in seconds until the rate limit resets, based on the Retry-After header or X-Rate-Limit-Reset timestamp
+  // Stores the countdown in seconds until the rate limit resets, based on X-Rate-Limit-Reset timestamp
   const [secondsLeft, setSecondsLeft] = useState(0);
 
 
@@ -102,7 +102,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
 
   /* ATTENDEE ACTIONS */
 
-  // Appends a new empty attendee to the current form
+  // Appends a new empty attendee to the current form without change the previous ones
   const addAttendee = () => {
     const newAttendee = createEmptyAttendee();
 
@@ -170,7 +170,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
   // Updates the shared rate limit state after a successful request
   const handleRequestSuccess = (result, feedbackBuilder) => {
     const { limit, remaining } = readRateLimitHeaders(result.headers, 5);
-    const requestCount = remaining !== null ? limit - remaining : 0;
+    const requestCount = remaining === null ? 0 : limit - remaining;
 
     setRateLimitInfo((current) => ({
       ...current,
@@ -190,10 +190,10 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
   const handleRequestError = (error, options = {}) => {
     const { isTest = false, index = null } = options;
 
-    // Read rate limit headers even on error responses, when available
+    // Reads rate limit headers even on error responses, when available
     const { limit, remaining, retryAfter } = readRateLimitHeaders(error.headers, rateLimitInfo?.limit ?? 5);
      
-    const requestCount = remaining !== null ? limit - remaining : rateLimitInfo?.requestCount ?? 0;
+    const requestCount = remaining === null ? (rateLimitInfo?.requestCount ?? 0) : limit - remaining;
 
     // Map known error codes to give user-friendly messages
     switch (error.code) {
@@ -249,7 +249,8 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
 
   // Validates the form, builds the payload, and sends it to the Producer API
   const handleSubmit = async (event) => {
-    
+
+    // Prevents from reload the page after send the form data
     event.preventDefault();
 
     // Run frontend validation before sending the request
@@ -268,18 +269,23 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
       attendees: {},
     });
 
+
     setIsSubmitting(true);
 
+    // Blue message
     setFeedback(buildLoadingFeedback());
 
+    // Request attempt
     try {
 
       // Build the final payload expected by the backend
       const campaignPayload = buildCampaignPayload(formData);
 
-      // API expects an array of campaigns
+      /* API expects an array of campaigns: runs HTTP request with the campaignPayload as body
+      and wait until the server give a response. Response in stored in result constant */
       const result = await syncCampaigns([campaignPayload]);
 
+      // Successfully submission
       handleRequestSuccess(result, buildSuccessFeedback);
 
       // Reset the form after a successful submission
@@ -287,7 +293,8 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
       setSelectedRowId('');
 
     } catch (error) {
-      
+
+      // Failure submision
       handleRequestError(error);
 
     } finally {
@@ -306,8 +313,10 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
         // Reads the test paylod
         const testPayload = buildTestPayload(i);
 
+        // Test Request attempt
         try {
 
+          // HTTP Request with test payload as body. Await for server response 6 times
           const result = await syncCampaigns(testPayload);
 
           handleRequestSuccess(result, (status) => buildTestSuccessFeedback(i, status));
@@ -322,6 +331,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
 
           const action = handleRequestError(error, { isTest: true, index: i });
 
+          // Test keep going even if a single request fails
           if (action === 'continue') {
 
             if (i < 6) {
@@ -345,7 +355,8 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
   
   // Reset the countdown when the banner is not in warning state
   useEffect(() => {
-  
+
+    /* If the feedback is different from warning or there is no retryAfter value, countdown value is 0 */
     if (feedback.type !== 'warning' || !rateLimitInfo?.retryAfter) {
       setSecondsLeft(0);
       return;
@@ -354,17 +365,22 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
     // Initialize the countdown with the number of seconds returned by the backend
     setSecondsLeft(rateLimitInfo.retryAfter);
 
+    // Dependencies: if one of these values changes, load this useEffect
     }, [feedback.type, rateLimitInfo?.retryAfter]);
 
 
     // Stop when the banner is not in warning state or the countdown is not active
     useEffect(() => {
-    
+
+      // Run the countdown only while the feedback is a warning and there is still time left to wait
       if (feedback.type !== 'warning' || secondsLeft <= 0) {
         return;
       }
 
+      // Wait 1 second before updating the countdown
       const timeoutId = setTimeout(() => {
+
+        // When the countdown reaches the last second, reset it and clear the warning state
         if (secondsLeft <= 1) {
           
           setSecondsLeft(0);
@@ -374,6 +390,7 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
             message: '',
           });
 
+          // Reset rate limit info so the UI can return to normal state
           setRateLimitInfo((current) => ({
             ...current,
             requestCount: 0,
@@ -385,9 +402,11 @@ function FormCampaign({ formData, setFormData, createInitialForm, createEmptyAtt
           return;
         }
 
+        // Otherwise, decrease the countdown by 1 every second
         setSecondsLeft((current) => current - 1);
       }, 1000);
 
+      // Clear the previous timer before running the effect again  (useEffect cleanup feature)
       return () => clearTimeout(timeoutId);
     }, [feedback.type, secondsLeft, setRateLimitInfo]);
       
