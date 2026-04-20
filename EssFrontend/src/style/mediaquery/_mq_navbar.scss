@@ -1,0 +1,50 @@
+@media (max-width: 1368px) {
+
+    .navbar_container h1 {
+
+        font-size: 1.7rem;
+
+    }
+
+    .navbar_container .navlinks {
+        width: 100%;
+   }
+
+}
+
+
+@media (max-width: 1200px) {
+
+      .navbar_container .navlinks li {
+            font-size: 0.9rem;
+
+      }
+
+      .person {
+
+         font-size: 0.9rem;
+
+      }
+
+ }
+
+
+@media (max-width: 1200px) {
+
+     .navbar_container h1 {
+
+            font-size: 1.5rem;
+
+        }
+
+      .navbar_container .navlinks li {
+            font-size: 0.8rem;
+
+      }
+
+       .person {
+           font-size: 0.8rem;
+
+       }
+
+ }

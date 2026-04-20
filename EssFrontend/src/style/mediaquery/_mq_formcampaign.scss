@@ -1,41 +1,26 @@
-// Two rows
-
-@media (max-width: 1999px) {
-
- form .attendee_row {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "col1 col2"
-      "birth .";
-    align-items: stretch;
-  }
-
-  form .attendee_row > .fields_column:nth-of-type(1) {
-    grid-area: col1;
-  }
-
-  form .attendee_row > .fields_column:nth-of-type(2) {
-    grid-area: col2;
-  }
-
-  form .attendee_row > .fields_column:nth-of-type(3) {
-    grid-area: birth;
-  }
-}
-
 // One row
-@media (max-width: 1300px) {
-  form .attendee_row {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "col1"
-      "col2"
-      "birth";
-  }
+@media (max-width: 1600px) {
 
-  form .attendee_row > .fields_column:nth-of-type(1) {
-    grid-area: col1;
-  }
+     form .new_campaign {
+            flex-direction: column;
+            gap: 1rem;
+     }
+
+    form .new_campaign input {
+            width: 100%;
+    }
+
+    form .new_attendee_row {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "col1"
+          "col2"
+          "birth";
+   }
+
+   form .attendee_row > .fields_column:nth-of-type(1) {
+       grid-area: col1;
+   }
 
   form .attendee_row > .fields_column:nth-of-type(2) {
     grid-area: col2;
@@ -56,23 +41,7 @@
   }
 }
 
-// Remove attendee group
-@media (max-width: 900px) {
-    
-  .action {
-    flex-direction: column;
-    align-items: stretch;
-  }
 
-  .remove_attendee_groups {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "label"
-      "select"
-      "button";
-  }
 
-  .remove_attendee_groups button {
-      width: 100%;
-  }
-}
+
+
