@@ -2,9 +2,7 @@
 
 .brand {
         p.institution_name {
-
             font-size: 2.5rem !Important;
-
         }
 
         p.institution_division {
@@ -15,7 +13,53 @@
 
 }
 
+@media (max-width: 1368px) {
+
+    .brand {
+
+            p.institution_name {
+                font-size: 2.2rem !Important;
+            }
+
+            p.institution_division {
+                  font-size: 1.2rem !Important;
+            }
+
+    }
+
+    .control_panel {
+
+        :first-child {
+            font-size: 1.3rem !Important;
+        }
+
+    }
+
+}
 
 
+@media (max-width: 1200px) {
+
+    .brand {
+
+            p.institution_name {
+                font-size: 1.7rem !Important;
+            }
+
+            p.institution_division {
+                  font-size: 1rem !Important;
+            }
+
+    }
+
+
+    .control_panel {
+
+            :first-child {
+                font-weight: lighter !Important;
+            }
+
+    }
+}
 
 
