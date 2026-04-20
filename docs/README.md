@@ -11,6 +11,21 @@ It consists of two main services:
 - Ingestion API (Producer) → receives and validates incoming data, then publishes messages
 - Event Worker (Consumer) → processes messages asynchronously and persists data into PostgreSQL
 
+
+## 📖 Project Evolution
+
+The original scope of the project focused on asynchronous campaign synchronization between an external CRM and an internal database.
+
+The current implementation extends that foundation with additional application modules and infrastructure components:
+
+- a separate React frontend used to simulate CRM submissions through a visual interface
+- a scheduled reporting module in the Event Worker
+- Excel report generation with Apache POI
+- email delivery through a local Mailhog SMTP container
+- API protection with rate limiting on the Ingestion API
+
+These additions preserve the original event-driven flow while improving usability, observability, and operational safety.
+
 ---
 
 ## 🧱 Architecture
@@ -31,6 +46,20 @@ CRM → Ingestion API → RabbitMQ → Event Worker → PostgreSQL
     - performs full-state synchronization on the database
     - routes failed messages to a Dead Letter Queue (DLQ) after retry attempts
 
+
+### Extended Runtime Components
+
+In addition to the original Producer/Consumer architecture, the project now includes:
+
+- a standalone **React SPA frontend**
+- a **scheduled reporting flow** executed by the Event Worker
+- a **Mailhog container** for local email testing
+- a **rate limiting layer** in the Ingestion API based on API Key identity
+
+The extended runtime flow is therefore:
+
+React Frontend / CRM → Ingestion API → RabbitMQ → Event Worker → PostgreSQL  
+↘ Scheduled Excel Report → Mailhog
 ---
 
 ## 🧭 Architecture Diagram
@@ -52,6 +81,29 @@ flowchart LR
 
     style DLQ fill:#ffe6e6
     
+```
+### Extended Architecture Diagram
+
+```mermaid
+flowchart LR
+    CRM[CRM System] --> API[Ingestion API]
+    UI[React Frontend] --> API
+
+    API --> EXCHANGE[RabbitMQ Exchange]
+    EXCHANGE --> QUEUE[crm.campaign.queue]
+
+    QUEUE --> WORKER[Event Worker]
+    WORKER --> DB[(PostgreSQL)]
+
+    WORKER --> REPORT[Scheduled Excel Report]
+    REPORT --> MAIL[Mailhog SMTP]
+
+    API --> RL[Rate Limiting by API Key]
+    WORKER --> DLQ[Dead Letter Queue]
+
+    style DLQ fill:#ffe6e6
+    style UI fill:#e8f0ff
+    style MAIL fill:#e8f8e8
 ```
 
 ---
@@ -151,6 +203,39 @@ security:
 - Each campaign → **1 message**
 - Messages are published asynchronously
 
+
+## 🚦 API Protection – Rate Limiting
+
+The Ingestion API is protected by a rate limiting layer to prevent abuse or accidental request flooding.
+
+### Policy
+
+Rate limiting is applied per caller identity using the `X-API-KEY` header.
+
+Example policy:
+
+- maximum **5 requests per minute** for each API Key
+
+### Implementation Notes
+
+- the limit check happens before request body validation
+- requests over the configured threshold are rejected immediately
+- the API returns:
+
+`429 Too Many Requests`
+
+### Suggested Technology
+
+The rate limiting layer can be implemented using **Bucket4j** integrated through a Spring `Filter` or `HandlerInterceptor`.
+
+### Configurability
+
+The following values can be externalized in `application.yml`:
+
+- enabled flag
+- request capacity
+- refill window
+- refill amount
 ---
 
 ## ⚙️ Service 2 – Event Worker (Consumer)
@@ -198,6 +283,109 @@ The system is designed to treat every incoming payload as a **source of truth sn
 )
 ```
 
+## 📊 Reporting Module 
+
+The Event Worker has been extended with a scheduled reporting module responsible for generating campaign summary reports from the synchronized database state.
+
+### Responsibilities
+
+- Load the current campaign data from PostgreSQL
+- Aggregate campaign and attendee information into report-ready structures
+- Generate an Excel workbook (`.xlsx`) using Apache POI
+- Build summary tables and chart sheets
+- Send the generated report as an email attachment to the configured recipient
+
+### Report Format
+
+The reporting module generates an Excel file containing:
+
+- campaign summary data
+- attendee detail tables grouped by campaign
+- dashboard-oriented sheets for aggregated analysis
+- chart sheets generated programmatically with Apache POI
+
+The base report requirement is to provide one table for each campaign and list the main attendee fields such as:
+
+- First Name
+- Last Name
+- CN
+- Birth Date
+- Companion
+
+### Scheduling
+
+Report generation is executed automatically through Spring scheduling.
+
+The schedule is configurable in `application.yml` using either:
+
+- a Cron expression
+- a fixed delay configuration
+
+### Email Delivery
+
+Once generated, the Excel report is sent by email as an attachment using Spring Mail.
+
+In local development, email delivery is tested using Mailhog.
+
+
+## 💻 Service 3 – Simulation Frontend (React SPA)
+
+
+To simplify manual testing and provide a more realistic CRM simulation flow, the project includes a separate frontend application built as a client-side Single Page Application.
+
+The frontend is fully decoupled from the Java backend and runs on its own development server.
+
+### Responsibilities
+
+- Provide a visual form to compose campaign payloads
+- Manage dynamic attendee rows
+- Send authenticated requests to the Ingestion API
+- Display user feedback for successful and failed submissions
+
+### Main Features
+
+- campaign form section:
+    - `campaignId`
+    - `subCampaignId`
+- attendee dynamic section:
+    - `cn`
+    - `firstName`
+    - `lastName`
+    - `birthDate`
+    - `partnerId`
+    - `isCompanion`
+    - `qrCode`
+- button to add or remove attendees dynamically
+- JSON payload generation based on the agreed contract
+- HTTP POST integration with `/api/v1/crm/sync`
+- visual feedback for:
+    - `202 Accepted`
+    - `400 Bad Request`
+    - `401 Unauthorized`
+    - `429 Too Many Requests`
+
+### Frontend Integration Notes
+
+Because the frontend runs on a different origin, the Ingestion API must explicitly allow the frontend origin through CORS configuration.
+
+Each request sent by the frontend includes the custom authentication header:
+
+`X-API-KEY: <your-api-key>`
+
+### Suggested Frontend Structure
+
+```text
+frontend-app/
+├── src/
+│   ├── components/
+│   ├── services/
+│   ├── hooks/
+│   ├── utils/
+│   ├── pages/
+│   └── App.jsx
+├── package.json
+└── vite.config.js
+```
 ---
 
 ## 🧠 Design Decisions
@@ -206,6 +394,19 @@ The system is designed to treat every incoming payload as a **source of truth sn
 - Full state synchronization guarantees consistency with the CRM system
 - DTOs decouple API and persistence layers
 - RabbitMQ enables asynchronous processing and resilience
+
+## 🧠 Internal Reporting Pipeline
+
+The reporting workflow is structured in multiple steps:
+
+1. retrieve synchronized campaign data from the database
+2. transform domain data into aggregation DTOs
+3. build workbook sheets for summary and detailed campaign data
+4. generate dashboard charts from support tables
+5. export the workbook to a binary file
+6. attach the generated file to an outgoing email
+
+This separation keeps reporting concerns isolated and makes the Excel generation layer easier to maintain and extend.
 
 ## ⚙️ Fault Tolerance
 
@@ -244,6 +445,10 @@ docker-compose down
 | PostgreSQL          | 5432  |
 | RabbitMQ            | 5672  |
 | RabbitMQ UI console | 15672 |
+| Mailhog             | 1025  |
+| Mailhog UI console  | 8025  |
+| React SPA           | 3000  |
+
 
 ### RabbitMQ Dashboard
 
@@ -254,7 +459,11 @@ Credentials:
 `guest / guest`
 
 
+### Mailhog Dashboard
+
+http://localhost:8025
 ---
+
 
 ## 📂 Project Structure
 
@@ -270,6 +479,7 @@ messaging/
 models/
 repos/
 services/
+helper/
 
 ```
 
@@ -285,6 +495,15 @@ security/
 services/
     
 ```
+
+Frontend
+
+```
+components/
+api/
+helpers/
+style/
+``` 
 
 There is also an "infrastructure" folder that contains the `docker-compose.yml` file to run both the microservices.
 
@@ -330,6 +549,18 @@ There is also an "infrastructure" folder that contains the `docker-compose.yml` 
 - JUnit 5 + TestContainers
 - SonarQube
 
+
+### Additional Technologies Introduced in the Extended Scope
+
+- React
+- Vite
+- Axios / Fetch API
+- Apache POI
+- Spring Scheduling
+- Spring Mail
+- Mailhog
+- Bucket4j
+
 ---
 
 ## 🧪 Testing Strategy
@@ -362,6 +593,20 @@ Containers are started automatically during test execution.
     - correct creation of new campaigns
     - full replacement of attendees on update (idempotency)
 - Transactional behavior guarantees consistency during updates
+
+### Extended Test Coverage
+
+The extended scope introduces additional testing areas.
+
+#### Frontend
+
+- component rendering tests for dynamic attendee rows
+- payload generation verification
+- API integration testing with mocked HTTP responses
+- feedback rendering for `202`, `400`, `401`, and `429`
+
+
+
 
 ---
 
